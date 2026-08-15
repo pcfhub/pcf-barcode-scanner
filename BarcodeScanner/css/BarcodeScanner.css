@@ -1,0 +1,70 @@
+/*
+ * Every rule is scoped under the control's own class.
+ *
+ * A code component shares a document with the host app and with every other
+ * control on the form, so a bare `input { … }` here restyles the page it was
+ * dropped onto. The platform does not sandbox this for you.
+ */
+
+.BarcodeScanner {
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+    font: inherit;
+    color: inherit;
+}
+
+.BarcodeScanner .BarcodeScanner-row {
+    display: flex;
+    gap: 4px;
+}
+
+.BarcodeScanner .BarcodeScanner-input {
+    flex: 1 1 auto;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 6px 8px;
+    /* Inherit rather than declare: the host controls the form's type scale, and
+       a hard-coded family is what makes a control look pasted in. */
+    font: inherit;
+    color: inherit;
+    background: transparent;
+    border: 1px solid rgba(0, 0, 0, 0.25);
+    border-radius: 2px;
+}
+
+.BarcodeScanner .BarcodeScanner-input:focus-visible {
+    outline: 2px solid Highlight;
+    outline-offset: 1px;
+}
+
+.BarcodeScanner .BarcodeScanner-input:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.BarcodeScanner .BarcodeScanner-scan {
+    flex: 0 0 auto;
+    font: inherit;
+    padding: 6px 12px;
+    border: 1px solid rgba(0, 0, 0, 0.25);
+    border-radius: 2px;
+    background: transparent;
+    cursor: pointer;
+}
+
+.BarcodeScanner .BarcodeScanner-scan:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.BarcodeScanner .BarcodeScanner-status {
+    display: block;
+    margin-top: 4px;
+    font-size: 0.85em;
+    color: rgba(0, 0, 0, 0.6);
+}
+
+.BarcodeScanner .BarcodeScanner-status:empty {
+    display: none;
+}

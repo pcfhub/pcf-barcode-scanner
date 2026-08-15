@@ -1,0 +1,57 @@
+{
+    "schemaVersion": 1,
+
+    "slug": "pcf-barcode-scanner",
+    "name": "Barcode Scanner",
+    "tagline": "A text field with a device barcode/QR scan button.",
+    "category": "input",
+    "tags": ["device", "barcode", "qr"],
+
+    "control": {
+        "namespace": "PCFHub",
+        "constructor": "BarcodeScanner",
+        "type": "field",
+        "framework": "standard",
+        "manifestPath": "BarcodeScanner/ControlManifest.Input.xml"
+    },
+
+    "links": {
+        "homepage": "https://github.com/pcfhub/pcf-barcode-scanner",
+        "support": "https://github.com/pcfhub/pcf-barcode-scanner/issues",
+        "license": "MIT"
+    },
+
+    "docs": {
+        "path": "docs"
+    },
+
+    "media": {
+        "logo": "media/logo.svg",
+        "screenshots": ["media/field.png", "media/scan-button.png"]
+    },
+
+    "demo": {
+        "fidelity": "limited",
+        "bundle": "out/controls/BarcodeScanner/bundle.js",
+        "styles": ["out/controls/BarcodeScanner/css/BarcodeScanner.css"],
+        "limitations": [
+            "The scan button calls context.device.getBarcodeValue(), which the demo sandbox always rejects (no device APIs behind that origin) — scanning shows the control's own no-camera state instead of a real result",
+            "Typing a value directly into the field still works, since that path never touches context.device"
+        ],
+        "presets": [
+            {
+                "slug": "default",
+                "name": "Default",
+                "description": "An empty field, ready to type into or attempt a scan.",
+                "props": { "value": "" },
+                "isDefault": true
+            },
+            {
+                "slug": "prefilled",
+                "name": "Already scanned",
+                "description": "Shows the field's post-scan state without needing a working scanner.",
+                "props": { "value": "PCFHUB-DEMO-0001" }
+            }
+        ]
+    }
+}

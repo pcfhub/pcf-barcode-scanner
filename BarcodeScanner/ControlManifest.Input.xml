@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<manifest>
+  <control namespace="PCFHub" constructor="BarcodeScanner" version="0.1.0" display-name-key="BarcodeScanner_Name" description-key="BarcodeScanner_Desc" control-type="standard" >
+    <external-service-usage enabled="false">
+    </external-service-usage>
+
+    <property name="value" display-name-key="Value_Name" description-key="Value_Desc" of-type="SingleLine.Text" usage="bound" required="true" />
+    <property name="scanButtonLabel" display-name-key="ScanButtonLabel_Name" description-key="ScanButtonLabel_Desc" of-type="SingleLine.Text" usage="input" required="false" default-value="Scan" />
+
+    <resources>
+      <code path="index.ts" order="1"/>
+      <css path="css/BarcodeScanner.css" order="1" />
+      <resx path="strings/BarcodeScanner.1033.resx" version="1.0.0" />
+    </resources>
+
+    <!-- The only platform surface this control reaches — everything else is
+         a plain text input. Real behaviour: opens the device's native
+         barcode/QR scanner and writes the decoded string into `value`. The
+         demo harness's context.device rejects every call (Context.ts,
+         deviceUnavailable()), so the control must catch that rejection and
+         show its own "scanning unavailable here" state rather than hang. -->
+    <feature-usage>
+      <uses-feature name="Device.getBarcodeValue" required="true" />
+    </feature-usage>
+  </control>
+</manifest>
