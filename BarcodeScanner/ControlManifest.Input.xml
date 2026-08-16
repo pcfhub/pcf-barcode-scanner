@@ -1,16 +1,27 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <manifest>
-  <control namespace="PCFHub" constructor="BarcodeScanner" version="0.1.0" display-name-key="BarcodeScanner_Name" description-key="BarcodeScanner_Desc" control-type="standard" >
+  <control namespace="PCFHub" constructor="BarcodeScanner" version="0.2.0" display-name-key="BarcodeScanner_Name" description-key="BarcodeScanner_Desc" control-type="standard" >
     <external-service-usage enabled="false">
     </external-service-usage>
 
     <property name="value" display-name-key="Value_Name" description-key="Value_Desc" of-type="SingleLine.Text" usage="bound" required="true" />
-    <property name="scanButtonLabel" display-name-key="ScanButtonLabel_Name" description-key="ScanButtonLabel_Desc" of-type="SingleLine.Text" usage="input" required="false" default-value="Scan" />
+
+    <!-- scanButtonLabel (SingleLine.Text input, default "Scan") removed in
+         0.2.0: it existed only so a maker could translate the word "Scan"
+         by hand per instance. Now that the manifest carries real resx
+         translations (see strings/), the button label localises itself from
+         the org's provisioned language the same way every other maker-facing
+         string on this control already did — a maker no longer needs to
+         type a translation into a property to get one. -->
 
     <resources>
       <code path="index.ts" order="1"/>
       <css path="css/BarcodeScanner.css" order="1" />
       <resx path="strings/BarcodeScanner.1033.resx" version="1.0.0" />
+      <resx path="strings/BarcodeScanner.3082.resx" version="1.0.0" />
+      <resx path="strings/BarcodeScanner.1036.resx" version="1.0.0" />
+      <resx path="strings/BarcodeScanner.1031.resx" version="1.0.0" />
+      <resx path="strings/BarcodeScanner.1041.resx" version="1.0.0" />
     </resources>
 
     <!-- The only platform surface this control reaches — everything else is

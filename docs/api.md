@@ -37,5 +37,6 @@ is no separate output declared in the manifest, since a `SingleLine.Text`
 bound property already round-trips both directions. Scanning and typing
 both write through the same property.
 
-`Scan button label` accepts any text; there's no accepted-values list to
-document — it's shown verbatim on the button.
+The **Scan** button's label isn't a property — it's a localised string,
+resolved from the org's provisioned language the same way the property names
+on this page are. See [Model-driven apps](model-driven.md).

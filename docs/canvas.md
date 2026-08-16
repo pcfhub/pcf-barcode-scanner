@@ -22,7 +22,6 @@ Set(varCode, "");
 | Property | Value |
 | --- | --- |
 | Value | `varCode` |
-| Scan button label | `"Scan"` (or leave unset — this is its default) |
 
 ## Reading the output
 

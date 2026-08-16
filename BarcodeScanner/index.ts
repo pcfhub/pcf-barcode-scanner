@@ -79,7 +79,7 @@ export class BarcodeScanner implements ComponentFramework.StandardControl<IInput
             this.input.value = incoming;
         }
 
-        this.scanButton.textContent = context.parameters.scanButtonLabel.raw ?? 'Scan';
+        this.scanButton.textContent = context.resources.getString('BarcodeScanner_ScanButton');
         this.input.disabled = context.mode.isControlDisabled;
         this.scanButton.disabled = context.mode.isControlDisabled;
     }
@@ -103,7 +103,7 @@ export class BarcodeScanner implements ComponentFramework.StandardControl<IInput
             // docblock) and on any device with no camera or scanner
             // hardware — not an error state to log, just tell the visitor
             // typing still works.
-            this.status.textContent = 'Scanning isn\'t available here — type the code instead.';
+            this.status.textContent = context.resources.getString('BarcodeScanner_Unavailable');
         }
     }
 }

@@ -21,7 +21,7 @@ as `SingleLine.Text`, so the designer won't offer an incompatible column
 type in the first place.
 
 :::callout{type=info}
-**Scan button label** is the control's one static configuration value — set
-it in the component's properties if "Scan" isn't the right word for your
-form (a Spanish form, a different verb for the field's context).
+The **Scan** button's label follows the user's language automatically — no
+property to set. It ships translated for English (US), Spanish, French,
+German, and Japanese; any other provisioned language falls back to English.
 :::

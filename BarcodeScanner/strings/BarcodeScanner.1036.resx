@@ -1,13 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <root>
   <!--
-    Display names and descriptions for everything declared in
-    ControlManifest.Input.xml. PCFHub reads the manifest, so these strings are
-    what appear in the component's API reference on the hub as well as in the
-    maker's properties pane.
-
-    Copy this file to add a language — BarcodeScanner.3082.resx for Spanish, and so
-    on — then list it under <resources> in the manifest.
+    French (fr-FR). See BarcodeScanner.1033.resx for the schema/generation
+    notes — this file only carries translated <data> values.
   -->
   <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
     <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
@@ -69,25 +64,23 @@
   </resheader>
 
   <data name="BarcodeScanner_Name" xml:space="preserve">
-    <value>Barcode Scanner</value>
+    <value>Lecteur de codes-barres</value>
   </data>
   <data name="BarcodeScanner_Desc" xml:space="preserve">
-    <value>A text field with a device barcode/QR scan button.</value>
+    <value>Un champ de texte avec un bouton pour scanner un code-barres/QR depuis l'appareil.</value>
   </data>
 
   <data name="Value_Name" xml:space="preserve">
-    <value>Value</value>
+    <value>Valeur</value>
   </data>
   <data name="Value_Desc" xml:space="preserve">
-    <value>The scanned or typed code.</value>
+    <value>Le code scanné ou saisi.</value>
   </data>
 
-  <!-- Runtime UI strings — read via context.resources.getString() in
-       index.ts, not the maker's properties pane. -->
   <data name="BarcodeScanner_ScanButton" xml:space="preserve">
-    <value>Scan</value>
+    <value>Scanner</value>
   </data>
   <data name="BarcodeScanner_Unavailable" xml:space="preserve">
-    <value>Scanning isn't available here — type the code instead.</value>
+    <value>La numérisation n'est pas disponible ici — saisissez le code à la place.</value>
   </data>
 </root>

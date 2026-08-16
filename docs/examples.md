@@ -14,7 +14,6 @@ scanning a physical label rather than typing.
 | Property | Value |
 | --- | --- |
 | Bound column | `new_serialnumber` (Single Line of Text) |
-| Scan button label | `Scan` (default) |
 
 ::image{src=media/example-basic.png alt="Barcode Scanner bound to a serial number column"}
 
