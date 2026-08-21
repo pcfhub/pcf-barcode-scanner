@@ -15,7 +15,7 @@ scanning a physical label rather than typing.
 | --- | --- |
 | Bound column | `new_serialnumber` (Single Line of Text) |
 
-::image{src=media/example-basic.png alt="Barcode Scanner bound to a serial number column"}
+::image{src=media/screenshot.png alt="The control as it renders on a form: a text input with a Scan button beside it"}
 
 ## A canvas app that scans into a collection
 

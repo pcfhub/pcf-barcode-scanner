@@ -8,7 +8,7 @@ order: 1
 
 A text field with a device barcode/QR scan button.
 
-::image{src=media/field.png alt="Barcode Scanner field with a Scan button" zoom}
+::image{src=media/screenshot.png alt="A Barcode text column with a Scan button beside it" zoom}
 
 ## Why this one
 
