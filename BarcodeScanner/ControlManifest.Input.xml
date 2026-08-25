@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <manifest>
-  <control namespace="PCFHub" constructor="BarcodeScanner" version="0.2.0" display-name-key="BarcodeScanner_Name" description-key="BarcodeScanner_Desc" control-type="standard" >
+  <control namespace="PCFHub" constructor="BarcodeScanner" version="0.2.1" display-name-key="BarcodeScanner_Name" description-key="BarcodeScanner_Desc" control-type="standard" >
     <external-service-usage enabled="false">
     </external-service-usage>
 
