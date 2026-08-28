@@ -12,6 +12,7 @@
     "rebuild": "pcf-scripts rebuild",
     "start": "pcf-scripts start",
     "refreshTypes": "pcf-scripts refreshTypes",
+    "smoke": "node dev/smoke.js",
     "lint": "eslint BarcodeScanner --ext .ts,.tsx"
   },
   "devDependencies": {
