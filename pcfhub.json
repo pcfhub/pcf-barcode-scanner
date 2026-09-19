@@ -5,6 +5,7 @@
     "name": "Barcode Scanner",
     "tagline": "A text field with a device barcode/QR scan button.",
     "category": "input",
+    "hosts": ["canvas", "model-driven"],
     "tags": ["device", "barcode", "qr"],
 
     "control": {
