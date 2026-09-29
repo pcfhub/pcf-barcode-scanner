@@ -22,5 +22,5 @@ always works too — the button is a shortcut, not the only way in.
 
 Model-driven forms and canvas apps, on **Web**, **Phone** and **Tablet**.
 Scanning itself only works on a device with a camera or scanner hardware —
-see [Limitations](limitations.md) for what happens without one, including in
-the hub's own live demo.
+see [Limitations](limitations.md) for what happens without one. The hub's own
+live demo simulates the scanner's answer on its default preset.

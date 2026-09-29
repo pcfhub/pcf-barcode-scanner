@@ -67,6 +67,28 @@ behind this origin."` It does not resolve with a canned value. So:
   `dataset`): `default` (empty field) and `prefilled` (post-scan state), so
   a visitor can see both without a working scanner.
 
+**The scan shows since 2026-09-29, simulated.** pcfhub/pcfhub#60 let a preset
+declare `state.device`, describing the Power Apps mobile client: the default
+preset, now *On the mobile app*, declares `barcode: "9780201633610"`, and the
+harness answers `getBarcodeValue()` with it and logs the answer as simulated.
+A new *In a desktop browser* preset declares nothing and keeps the refusal, so
+the no-scanner state is still one click away. Fidelity moved from `limited` to
+`mocked`: the feature runs, against a stand-in answer.
+
+Checked with 0.2.1's published bundle against that harness, before the push:
+
+- *On the mobile app*: Scan filled the field with `9780201633610`, and the event
+  log said it was simulated;
+- *In a desktop browser*: Scan showed "Scanning isn't available here — type the
+  code instead." and the field stayed empty.
+
+**Not verified:** what a model-driven form in a desktop browser does with this
+control. It has no `getBarcodeValue`, and the manifest declares
+`Device.getBarcodeValue` `required="true"` — which the template check warns
+makes a host without the bridge fail to load the component rather than
+degrade. So the no-scanner state is proven in the harness, not on that host,
+and the limitation says so.
+
 ## Bundle path — fixed before it could repeat the pcf-tag-list mistake
 
 Same guess-then-verify process as `pcf-tag-list`: `demo.bundle` was drafted

@@ -32,20 +32,29 @@
     },
 
     "demo": {
-        "fidelity": "limited",
+        "fidelity": "mocked",
         "bundle": "out/controls/BarcodeScanner/bundle.js",
         "styles": ["out/controls/BarcodeScanner/css/BarcodeScanner.css"],
         "limitations": [
-            "The scan button calls context.device.getBarcodeValue(), which the demo sandbox always rejects (no device APIs behind that origin) — scanning shows the control's own no-camera state instead of a real result",
-            "Typing a value directly into the field still works, since that path never touches context.device"
+            "The scan is simulated. On the Power Apps mobile app, Scan opens the device's own scanner; the demo has no camera to reach, so the On the mobile app preset answers context.device.getBarcodeValue() with a fixed code, 9780201633610, and the event log under the demo says the answer was simulated. What the control does with it is real: the code lands in the field and in the value output a form would save.",
+            "The In a desktop browser preset declares no scanner, so getBarcodeValue() is refused and Scan shows the control's own \"Scanning isn't available here\" state; typing the code in still fills the field, since that path never touches context.device. A model-driven form in a desktop browser has no getBarcodeValue either — but this control declares Device.getBarcodeValue as required, so what such a form does with it, show this state or not load the control, is unmeasured."
         ],
         "presets": [
             {
                 "slug": "default",
-                "name": "Default",
-                "description": "An empty field, ready to type into or attempt a scan.",
+                "name": "On the mobile app",
+                "description": "An empty field on the Power Apps mobile app. Press Scan: the demo answers as the device's scanner would, with a simulated EAN-13, and the code lands in the field.",
                 "props": { "value": "" },
-                "isDefault": true
+                "isDefault": true,
+                "state": {
+                    "device": { "barcode": "9780201633610" }
+                }
+            },
+            {
+                "slug": "desktop-browser",
+                "name": "In a desktop browser",
+                "description": "The same empty field where there is no scanner to call. Scan shows the control's no-scanner state, and typing the code in still works.",
+                "props": { "value": "" }
             },
             {
                 "slug": "prefilled",

@@ -41,14 +41,17 @@ touches.
 
 ## On the hub
 
-The demo runs at **limited** fidelity, and the component page says so on the demo
+The demo runs at **mocked** fidelity, and the component page says so on the demo
 itself:
 
-- The scan button always fails there. No origin behind the sandbox gets device
-  APIs, so `getBarcodeValue()` is rejected and you see the control's no-camera state
-  instead of a scan result — which is itself worth seeing before you install it.
+- **On the mobile app**, the default preset, declares a simulated scanner
+  (`state.device.barcode`, pcfhub/pcfhub#60). Scan answers with `9780201633610`,
+  the code lands in the field and the `value` output, and the event log says the
+  answer was simulated — the demo has no camera to reach.
+- **In a desktop browser** declares none, so Scan shows the control's
+  "Scanning isn't available here" state — worth seeing before you install it.
 - Typing a value works normally, and the **Already scanned** preset shows the
-  post-scan state without needing a working scanner.
+  post-scan state.
 
 ## Install
 

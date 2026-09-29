@@ -17,9 +17,10 @@ enable it for the client types you need. See
 ## Why does Scan just show "Scanning isn't available here"?
 
 There's no camera or scanner hardware behind the current session — most
-commonly a desktop browser, or the control's own live demo on PCFHub, which
-runs sandboxed with no device access at all. Type the code in directly; it
-writes to the same field. See [Limitations](limitations.md).
+commonly a desktop browser. Type the code in directly; it writes to the same
+field. The live demo on PCFHub shows both sides: its **In a desktop browser**
+preset has no scanner and shows this message, and its **On the mobile app**
+preset answers Scan with a simulated code. See [Limitations](limitations.md).
 
 ## Does it work offline / on mobile / in a phone layout?
 
