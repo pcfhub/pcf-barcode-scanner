@@ -4,6 +4,7 @@
     "slug": "pcf-barcode-scanner",
     "name": "Barcode Scanner",
     "tagline": "A text field with a device barcode/QR scan button.",
+    "summary": "A plain text field with a **Scan** button beside it. The button opens the device's native barcode and QR scanner and writes the decoded value into the column; typing the code by hand always works too.\n\nScanning needs a device with a camera or scanner hardware. It works on model-driven forms and in canvas apps.",
     "category": "input",
     "hosts": ["canvas", "model-driven"],
     "tags": ["device", "barcode", "qr"],
