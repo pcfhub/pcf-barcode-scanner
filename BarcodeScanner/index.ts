@@ -20,6 +20,23 @@ export class BarcodeScanner implements ComponentFramework.StandardControl<IInput
     private notifyOutputChanged!: () => void;
     private value = '';
 
+    /**
+     * Every value this control handed the platform recently — typed or
+     * scanned — newest last. Each write comes back as an `updateView`, late
+     * and **not necessarily in order** (typing "pase laur" on a real form
+     * produced "pase laur", "pase lau", "pase laur", measured 2026-09-13); a
+     * value found here is an echo whatever its order, and one never written
+     * is the form's own and is taken.
+     */
+    private written: string[] = [];
+
+    /**
+     * The value the host handed over last time. Equal to it is not news:
+     * PCFHub's demo re-renders with the preset's value as it always was
+     * (measured on pcf-input-mask's demo, 2026-09-28).
+     */
+    private lastIncoming: string | undefined = undefined;
+
     public init(
         context: ComponentFramework.Context<IInputs>,
         notifyOutputChanged: () => void,
@@ -72,9 +89,16 @@ export class BarcodeScanner implements ComponentFramework.StandardControl<IInput
     private render(context: ComponentFramework.Context<IInputs>): void {
         const incoming = context.parameters.value.raw ?? '';
 
-        // Guarded, not assigned unconditionally: writing `value` while the
-        // user is typing moves the caret to the end on every keystroke.
-        if (incoming !== this.value) {
+        // Guarded twice. A browser moves the caret to the end whenever `value`
+        // is assigned something different from what the box holds, so a late
+        // echo of an earlier keystroke both loses what was typed after it and
+        // throws the user to the end of the field. See `written`.
+        const repeated = incoming === this.lastIncoming;
+
+        this.lastIncoming = incoming;
+
+        if (!repeated && incoming !== this.value && !this.written.includes(incoming)) {
+            this.written = [];
             this.value = incoming;
             this.input.value = incoming;
         }
@@ -87,8 +111,18 @@ export class BarcodeScanner implements ComponentFramework.StandardControl<IInput
     private onInput = (): void => {
         this.value = this.input.value;
         this.status.textContent = '';
+        this.remember(this.value);
         this.notifyOutputChanged();
     };
+
+    /** Bounded: a form open all day should not keep every keystroke. */
+    private remember(value: string): void {
+        this.written.push(value);
+
+        if (this.written.length > 32) {
+            this.written.shift();
+        }
+    }
 
     private async onScan(context: ComponentFramework.Context<IInputs>): Promise<void> {
         this.status.textContent = '';
@@ -97,6 +131,7 @@ export class BarcodeScanner implements ComponentFramework.StandardControl<IInput
             const scanned = await context.device.getBarcodeValue();
             this.value = scanned;
             this.input.value = scanned;
+            this.remember(scanned);
             this.notifyOutputChanged();
         } catch {
             // Real, expected outcome in the demo sandbox (see the class
