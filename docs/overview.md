@@ -8,6 +8,10 @@ order: 1
 
 A text field with a device barcode/QR scan button.
 
+:::callout{type=warning}
+**Reference example · built with AI.** This control was written with AI (Claude) and tested on a live Dataverse form; its code has not been reviewed line by line. It is published as a worked example and is not maintained — read the source and [SPEC.md](https://github.com/pcfhub/pcf-barcode-scanner/blob/main/SPEC.md) (what was measured on the form) before you use it. Fixes are not guaranteed.
+:::
+
 ::image{src=media/screenshot.png alt="A Barcode text column with a Scan button beside it" zoom}
 
 ## Why this one

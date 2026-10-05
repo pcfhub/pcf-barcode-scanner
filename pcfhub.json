@@ -8,6 +8,8 @@
     "category": "input",
     "hosts": ["canvas", "model-driven"],
     "tags": ["device", "barcode", "qr"],
+    "supportLevel": "reference",
+    "builtWith": "ai",
 
     "control": {
         "namespace": "PCFHub",
