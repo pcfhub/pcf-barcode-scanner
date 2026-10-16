@@ -64,9 +64,12 @@
      * looks in production rather than throwing.
      */
     var STRINGS = {
-        BarcodeScanner_Name: 'Barcode Scanner',
-        BarcodeScanner_ScanButton: 'Scan',
-        BarcodeScanner_Unavailable: 'Scanning is not available here. Type the code instead.',
+        BarcodeScanner_Name: "Barcode Scanner",
+        BarcodeScanner_Desc: "A text field with a device barcode/QR scan button.",
+        Value_Name: "Value",
+        Value_Desc: "The scanned or typed code.",
+        BarcodeScanner_ScanButton: "Scan",
+        BarcodeScanner_Unavailable: "Scanning isn't available here — type the code instead.",
     };
 
     /**
