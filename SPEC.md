@@ -215,6 +215,44 @@ Information form, desktop Edge, the "Probe empty" account.
   14px — the values the stylesheet's fallbacks copy, read where the control
   draws.
 
+### Walked — 0.3.0 on the test form, 31 Oct 2026
+
+0.3.0 imported over the probe, desktop Edge, the same account; `cll_barcode`
+in one-code mode, `description` bound in many-codes mode for the walk (both
+probe bindings removed afterwards).
+
+- **W1 — the look.** The field is `#f5f5f5`, 32 px, 4 px radius, transparent
+  border; the platform's own *Account Name* box beside it measures the same
+  four values. Scan is 28 px with a 16 px glyph in `colorNeutralForeground2`;
+  focus scales the underline in, `#0f6cbd`. In the form it sits in line with
+  the platform's *Website* field, icon to icon. Scan names the field: *Scan a
+  code into Barcode*; on `description`, whose label is hidden on this form,
+  `mode.label` is empty and the name falls back to *Barcode Scanner*.
+- **W2 — Enter adds, a repeat is refused.** Real keystrokes into the add box:
+  the code went in as a second line (`Xrm` held `"…\n4006381333931"`, the
+  column dirty), the box emptied, and focus stayed in the control. The same
+  code again: *4006381333931 is already in the list.*, a warning with its
+  icon, nothing written.
+- **W3 — removing a row.** A real click on the new row's remove button: the
+  row went, the value was the original text again (the form no longer dirty),
+  *4006381333931 removed.* was announced, and focus moved to the remaining
+  row's remove button.
+- **W4 — Scan in many mode on the desktop** read *Scanning isn't available
+  here — type the code instead.* as a warning, wrote nothing, and was not left
+  `aria-disabled`.
+- **An import trap, not the control's: the stylesheet came stale.** The
+  probe was imported at 19:52 UTC and 0.3.0 at 20:38. The form then loaded
+  0.3.0's script with 0.2.x's stylesheet: the CSS URL carries a token,
+  `/{639290731520000167}/webresources/…` — 19:52 in .NET ticks — and under it
+  the server returned the old 1,630-byte file even to a `cache: 'reload'`
+  fetch, while the same URL without the token, and the bundle under the
+  token, were new. Clearing caches, IndexedDB and session storage and a
+  second Publish All did not move the token. W1–W4 were taken with the old
+  sheet disabled and the current one (fetched without the token) attached
+  for the walk; with both on the page, the old `.BarcodeScanner-scan`
+  padding came later and squeezed the glyph to 2 px. A maker importing once
+  is not in this position; a probe followed by a release the same hour is.
+
 ### Not measured
 
 - **The loop on a device.** What a scanner closed without a code returns
