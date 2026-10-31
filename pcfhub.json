@@ -3,11 +3,11 @@
 
     "slug": "pcf-barcode-scanner",
     "name": "Barcode Scanner",
-    "tagline": "A text field with a device barcode/QR scan button.",
-    "summary": "A plain text field with a **Scan** button beside it. The button opens the device's native barcode and QR scanner and writes the decoded value into the column; typing the code by hand always works too.\n\nScanning needs a device with a camera or scanner hardware. It works on model-driven forms and in canvas apps.",
+    "tagline": "A text field with a device barcode/QR scan button — one code, or a run of them.",
+    "summary": "A text field with a **Scan** button inside it, drawn like the form's own fields. The button opens the device's native barcode and QR scanner and writes the decoded value into the column; typing the code by hand always works too.\n\nSet **Scan mode** to many codes and the scanner comes back after each code until it is closed: each new code goes on its own line, listed under the field with a count, repeats skipped. Scanning needs a device with a camera or scanner hardware. It works on model-driven forms and in canvas apps.",
     "category": "input",
     "hosts": ["canvas", "model-driven"],
-    "tags": ["device", "barcode", "qr"],
+    "tags": ["device", "barcode", "qr", "batch"],
     "supportLevel": "reference",
     "builtWith": "ai",
 
@@ -39,15 +39,16 @@
         "bundle": "out/controls/BarcodeScanner/bundle.js",
         "styles": ["out/controls/BarcodeScanner/css/BarcodeScanner.css"],
         "limitations": [
-            "The scan is simulated. On the Power Apps mobile app, Scan opens the device's own scanner; the demo has no camera to reach, so the On the mobile app preset answers context.device.getBarcodeValue() with a fixed code, 9780201633610, and the event log under the demo says the answer was simulated. What the control does with it is real: the code lands in the field and in the value output a form would save.",
-            "The In a desktop browser preset declares no scanner, so getBarcodeValue() is refused and Scan shows the control's own \"Scanning isn't available here\" state; typing the code in still fills the field, since that path never touches context.device. A model-driven form in a desktop browser has no getBarcodeValue either — but this control declares Device.getBarcodeValue as required, so what such a form does with it, show this state or not load the control, is unmeasured."
+            "The scan is simulated. On the Power Apps mobile app, Scan opens the device's own scanner; the demo has no camera to reach, so the On the mobile app and Scan many presets answer context.device.getBarcodeValue() with a fixed code, 9780201633610, and the event log under the demo says the answer was simulated. What the control does with it is real: the code lands in the field and in the value output a form would save.",
+            "The demo answers every call with the same code, so the Scan many preset adds it once and then ends the run on two repeats, saying so — the guard that keeps a host answering by itself from looping. On a phone a run goes on until the scanner is closed; that loop has not been measured on a device yet (see SPEC.md).",
+            "The In a desktop browser preset declares no scanner, so getBarcodeValue() is refused and Scan shows the control's own \"Scanning isn't available here\" state; typing the code in still fills the field, since that path never touches context.device."
         ],
         "presets": [
             {
                 "slug": "default",
                 "name": "On the mobile app",
                 "description": "An empty field on the Power Apps mobile app. Press Scan: the demo answers as the device's scanner would, with a simulated EAN-13, and the code lands in the field.",
-                "props": { "value": "" },
+                "props": { "value": "", "scanMode": "one" },
                 "isDefault": true,
                 "state": {
                     "device": { "barcode": "9780201633610" }
@@ -57,13 +58,22 @@
                 "slug": "desktop-browser",
                 "name": "In a desktop browser",
                 "description": "The same empty field where there is no scanner to call. Scan shows the control's no-scanner state, and typing the code in still works.",
-                "props": { "value": "" }
+                "props": { "value": "", "scanMode": "one" }
+            },
+            {
+                "slug": "scan-many",
+                "name": "Scan many",
+                "description": "Many codes mode with two codes already in the column. Press Scan: the simulated code is added on its own line, then the run ends on the demo's repeated answer. Type a code into the box and press Enter to add it; the button on a row removes it.",
+                "props": { "value": "4006381333931\n5901234123457", "scanMode": "many" },
+                "state": {
+                    "device": { "barcode": "9780201633610" }
+                }
             },
             {
                 "slug": "prefilled",
                 "name": "Already scanned",
                 "description": "Shows the field's post-scan state without needing a working scanner.",
-                "props": { "value": "PCFHUB-DEMO-0001" }
+                "props": { "value": "PCFHUB-DEMO-0001", "scanMode": "one" }
             }
         ]
     }

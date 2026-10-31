@@ -33,10 +33,16 @@ order: 5
 ## Notes
 
 `Value` doubles as both the bound property and the effective output — there
-is no separate output declared in the manifest, since a `SingleLine.Text`
-bound property already round-trips both directions. Scanning and typing
-both write through the same property.
+is no separate output declared in the manifest, since a bound text property
+already round-trips both directions. Scanning and typing both write through
+the same property. Since 0.3.0 it binds a **Single Line of Text**, a **Text
+Area** or a **Multiple lines of text** column.
 
-The **Scan** button's label isn't a property — it's a localised string,
-resolved from the org's provisioned language the same way the property names
-on this page are. See [Model-driven apps](model-driven.md).
+**Scan mode** (`scanMode`) is `one` unless a maker sets it, so a form set up
+before 0.3.0 behaves as it did. In `many`, `Value` holds one code a line,
+separated by a line feed (`\n`), with no blank lines and no repeats.
+
+The **Scan** button's name and tooltip aren't properties — they're localised
+strings, resolved from the org's provisioned language the same way the
+property names on this page are, and they name the field the button belongs
+to. See [Model-driven apps](model-driven.md).

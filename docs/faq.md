@@ -22,6 +22,22 @@ field. The live demo on PCFHub shows both sides: its **In a desktop browser**
 preset has no scanner and shows this message, and its **On the mobile app**
 preset answers Scan with a simulated code. See [Limitations](limitations.md).
 
+## In Many codes mode, why did the scanner stop before I closed it?
+
+Three things end a run besides closing the scanner:
+
+- **two repeats in a row** — the status line names the code;
+- **a full column** — the next code would pass the column's maximum length;
+- **a device that won't reopen the scanner without a tap**, which has not
+  been ruled out on a phone (see [Limitations](limitations.md)).
+
+Press **Scan** again to carry on: the list keeps what the run added.
+
+## Can I scan the same code twice on purpose?
+
+Not in one list: a code already listed is skipped. Counting stock by scanning
+each unit is not what this control does; one line per distinct code is.
+
 ## Does it work offline / on mobile / in a phone layout?
 
 The field itself works everywhere — typing needs no connectivity.

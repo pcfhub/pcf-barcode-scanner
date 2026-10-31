@@ -15,11 +15,17 @@ recompiles it.
 
 ## What it does
 
-Replaces a single-line text column with the same field plus a scan button. The
-button calls `context.device.getBarcodeValue()`, which opens the device's native
-barcode/QR scanner and writes the decoded string back into the column. Typing into
-the field by hand keeps working exactly as before — that path never touches the
-device API.
+Replaces a text column with the same field plus a scan button inside it, drawn as
+Fluent 2's filled field so it sits on a modern form like the platform's own (light
+and dark, from the app's theme). The button calls
+`context.device.getBarcodeValue()`, which opens the device's native barcode/QR
+scanner and writes the decoded string back into the column. Typing into the field
+by hand keeps working exactly as before — that path never touches the device API.
+
+With **Scan mode** set to many codes (0.3.0), Scan keeps calling the scanner until
+it is closed and puts each new code on its own line: the codes are listed under the
+field with a count, any line can be removed, a repeat is skipped and said so, and a
+code typed into the box is added with Enter.
 
 Where scanning is unavailable — a desktop browser, a host that does not implement
 the device API, a denied camera permission — the call is rejected and the control
@@ -30,7 +36,8 @@ load.
 
 | Property | Type | Usage | What it controls |
 | --- | --- | --- | --- |
-| `value` | SingleLine.Text | bound, **required** | The column the field reads and writes |
+| `value` | SingleLine.Text, SingleLine.TextArea or Multiple | bound, **required** | The column the field reads and writes |
+| `scanMode` | Enum: `one` (default), `many` | input | One code per scan, or a run of them one per line |
 
 That is the entire configuration surface, deliberately. The scan button's label was
 a property until 0.2.0; it now localises itself from the org's provisioned language
@@ -52,8 +59,19 @@ itself:
   answer was simulated — the demo has no camera to reach.
 - **In a desktop browser** declares none, so Scan shows the control's
   "Scanning isn't available here" state — worth seeing before you install it.
+- **Scan many** starts with two codes listed. The demo answers every call with
+  the same code, so a run adds it once and then stops on two repeats — the
+  guard that keeps a host answering by itself from looping.
 - Typing a value works normally, and the **Already scanned** preset shows the
   post-scan state.
+
+## Develop without a device
+
+`npm run smoke` drives the built bundle against `dev/host.js`, whose scanner
+answers a queue: `barcode: ['A', 'B']` is one code per call, `barcodeEnd` says
+whether the call after the last rejects or returns `''` (what a closed scanner
+returns on a phone is unmeasured, so the control takes both). `npm run harness`
+opens `dev/harness.html` with the same switches beside the control.
 
 ## Install
 
