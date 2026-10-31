@@ -207,6 +207,17 @@
          */
         barcodeEnd: 'reject',
 
+        /**
+         * A model-driven form in a desktop browser (SPEC.md P1, measured
+         * 2026-10-31): `getBarcodeValue` is there — `typeof` says function —
+         * and **throws synchronously** when called, an `Error` reading
+         * "Required method 'Device.getBarcodeValue' not supported on this
+         * device. Error code: PlatformErrorCodes.OperationIsNotSupportedOnThisDevice".
+         * Not a rejected promise: `getBarcodeValue().catch(…)` never gets to
+         * attach its handler. Only an `await` inside `try` catches both.
+         */
+        barcodeThrows: false,
+
         /** The maker's Scan mode: 'one' (the manifest's default) or 'many'. */
         scanMode: 'one',
 
@@ -322,6 +333,10 @@
                 getBarcodeValue: function () {
                     if (o.calls) {
                         o.calls.push('getBarcodeValue');
+                    }
+
+                    if (o.barcodeThrows) {
+                        throw new Error("Required method 'Device.getBarcodeValue' not supported on this device. Error code: PlatformErrorCodes.OperationIsNotSupportedOnThisDevice");
                     }
 
                     if (typeof o.barcode === 'string') {

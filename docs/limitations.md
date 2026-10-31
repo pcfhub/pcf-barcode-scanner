@@ -49,7 +49,8 @@ order: 7
   column format if a specific shape needs enforcing.
 - **A repeat is an exact match.** `ABC` and `abc` are two codes, and so are
   two codes that differ only in leading zeros.
-- **Not tried on a desktop form with `required="true"` before 0.3.0.** The
-  manifest declares `Device.getBarcodeValue` required, because without a
-  scanner the control is just a text box. What a desktop model-driven form
-  does with that is recorded in SPEC.md (P1).
+- **On a model-driven form in a desktop browser, Scan says it isn't
+  available.** The manifest declares `Device.getBarcodeValue` required, and
+  such a form still loads the control (measured, SPEC.md P1). The platform
+  refuses the scan there, so the field works as a text box with the
+  no-scanner message.

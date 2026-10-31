@@ -155,12 +155,93 @@ manual translation. `docs/api.md`'s prose note about the property (the
 manifest, which no longer has the property) pointed to model-driven.md
 instead of describing a property that no longer exists.
 
+## 0.3.0 — scanning many, and a Fluent field
+
+Picked by the catalogue's 32nd demand survey (31 Oct 2026): the control was
+an overnight download mover, its own limitations said *One scan at a time*,
+and the canvas Barcode reader has *Scan multiple* while a model-driven form
+has nothing. The user's decisions, not to reopen: codes go **one per line in
+the bound column**, listed under the field with a count and removable; a
+repeat in a run is **skipped and said so**; the look is **Copy Field's
+route** (a standard control, Fluent tokens with fallbacks, no React); and
+**no phone** — the loop is built against the rig and said to be unmeasured on
+a device.
+
+### Measured — probe 0.2.9 on the test form, 31 Oct 2026
+
+A throwaway build (commit `6a3d960`): `value` as a type group, every pass
+logged per bound column, and console calls for a scan, a write and the Fluent
+tokens. Bound to `cll_barcode` (single line, 100), `cll_editor2` (single line,
+text area, 4000) and `description` (multiple lines, 2000) on the account
+Information form, desktop Edge, the "Probe empty" account.
+
+- **P1 — a desktop form loads the control, and `getBarcodeValue` throws.**
+  With `Device.getBarcodeValue` `required="true"`, the control loads and draws
+  on a model-driven form in a desktop browser: no *Error loading control*.
+  `context.device` is an object carrying `captureImage`, `captureAudio`,
+  `captureVideo`, `pickFile`, `getBarcodeValue`, `getCurrentPosition`,
+  `openARViewer`, `getMessageReceiver`; `typeof getBarcodeValue` is
+  `function`. **Calling it throws synchronously**, before any promise: an
+  `Error`, message *Required method 'Device.getBarcodeValue' not supported on
+  this device. Error code: PlatformErrorCodes.OperationIsNotSupportedOnThisDevice*,
+  no other keys. So `getBarcodeValue().catch(…)` never attaches its handler;
+  0.2.x and 0.3.0 both `await` it inside `try`, which catches it (now asserted
+  in smoke with the rig's `barcodeThrows`). The 0.2.x note "what such a form
+  does with it is unmeasured" is answered: it loads and shows the no-scanner
+  state.
+- **P2 — the type group imports over 0.2.2 and keeps its binding.** 0.2.9
+  imported as an upgrade; `cll_barcode`'s published form XML still read
+  `<value type="SingleLine.Text">`, the control loaded on it, and the
+  generated `IInputs.value` stayed `StringProperty`.
+- **P3 — what each column hands over** (`type`, then `attributes`):
+  `cll_barcode` `SingleLine.Text`, Format `Text`, MaxLength 100;
+  `cll_editor2` `SingleLine.TextArea`, Format `TextArea`, MaxLength 4000;
+  `description` `Multiple`, Format `"2"`, FormatName `TextArea`, Type `memo`,
+  MaxLength 2000. `EntityLogicalName` `account` on all three, `security`
+  `{ editable, readable, secured: false }`, `client` Web, form factor 1,
+  `isDarkTheme` false. A Multiple-lines field below the fold mounted only once
+  scrolled into view; the Grid tab's field once its tab was focused.
+- **P4 — a line break in a single-line column survives everything.** Through
+  the Web API: `"A\nB"` and `"A\r\nB"` stored and read back as written; 101
+  characters into the 100-character column refused whole, 400 *0x80044331 …
+  exceeded the maximum allowed length of '100'*. Through the form: the
+  control's write of `"A\nB"` came back on every pass as `"A\nB"`,
+  `Xrm.getValue()` held it, a form save kept it (duplicate detection's
+  *Ignore and save*), and the Web API read `"A\nB"`. So a run fits a
+  single-line column, and the length has to be checked before the write.
+- **The form publishes Fluent 9's tokens to a standard control's container**:
+  `--colorNeutralBackground3` #f5f5f5, `--colorCompoundBrandStroke` #0f6cbd,
+  `--borderRadiusMedium` 4px, `--fontFamilyBase` Segoe UI…, `--fontSizeBase300`
+  14px — the values the stylesheet's fallbacks copy, read where the control
+  draws.
+
+### Not measured
+
+- **The loop on a device.** What a scanner closed without a code returns
+  (rejection or `''` — both end a run), and whether a call made straight after
+  a code reopens the scanner without a tap (if not, a run is one code per
+  press). Needs the Power Apps mobile app.
+- A canvas app, a phone layout, a screen reader, field-level security.
+
+### Decisions that came out of it
+
+- A run ends on a refusal or an empty answer, on **two repeats in a row** (the
+  hub's demo answers the same code at once, forever), or when the next code
+  would pass the column's `MaxLength` — read only when `attributes` names a
+  table, since a canvas app reports 100 for every property.
+- Each code is written as it arrives, so a run cut short keeps what it had.
+- Scan is `aria-disabled`, not `disabled`, while it works.
+- One-code mode is unchanged; a list shows there as one line, because a
+  one-line box drops line breaks (documented).
+
 ## Still open
 
-- Category: set to `input` (existing hub category).
-- `media/` is still empty — `pcfhub.json` references `media/logo.svg`,
-  `media/field.png`, `media/scan-button.png`; docs reference
-  `media/example-basic.png`. None exist.
-- No GitHub repo yet — local scaffold only, not yet `git init`'d.
-- Solution packaging (`msbuild`) not attempted, same as `pcf-tag-list` —
-  only the Node/webpack half of the pipeline was verified locally.
+As of 0.3.0 (31 Oct 2026); the scaffold-era items that stood here — no media,
+no repository, no solution packed — were all closed by 0.2.x.
+
+- **Scanning many on a phone**: the two unmeasured answers above, on the Power
+  Apps mobile app.
+- **A queue in the hub's demo**: its harness answers one fixed code
+  (`state.device.barcode`), so the *Scan many* preset shows one add and the
+  repeat guard, not a run. A list of answers there is a pcfhub change.
+- Canvas app, phone layout, screen reader, field-level security: not walked.

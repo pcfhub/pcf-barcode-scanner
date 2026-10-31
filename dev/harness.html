@@ -151,6 +151,7 @@
                     <span>What a closed scanner returns is unmeasured on a device.</span>
                 </label>
 
+                <label class="check"><input type="checkbox" id="harness-throws" /> The call throws, as on a desktop form</label>
                 <label class="check"><input type="checkbox" id="harness-dark" /> Dark theme</label>
                 <label class="check"><input type="checkbox" id="harness-disabled" /> Read-only form</label>
                 <label class="check"><input type="checkbox" id="harness-error" /> A business rule failed</label>
@@ -208,6 +209,7 @@
                         maxLength: Number(byId('harness-maxlength').value) || 100,
                         barcode: scannerAnswers(),
                         barcodeEnd: byId('harness-barcodeend').value,
+                        barcodeThrows: byId('harness-throws').checked,
                         dark: byId('harness-dark').checked,
                         disabled: byId('harness-disabled').checked,
                         error: byId('harness-error').checked,

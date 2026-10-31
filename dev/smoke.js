@@ -300,6 +300,34 @@ check(
     );
 
     /*
+     * A model-driven form in a desktop browser does not reject: the method is
+     * there and **throws synchronously** (SPEC.md P1, 2026-10-31). A control
+     * written `getBarcodeValue().catch(…)` lets that escape; one that awaits
+     * inside `try` catches both — in either mode.
+     */
+    for (const scanMode of ['one', 'many']) {
+        const desktop = mount({ barcodeThrows: true, scanMode, realStrings: true });
+        let escaped = null;
+
+        try {
+            desktop.find('.BarcodeScanner-scan').click();
+        } catch (error) {
+            escaped = error;
+        }
+
+        await drain(3);
+
+        check(
+            `${scanMode}: a desktop form's synchronous throw is caught and reads as "no scanner here", writing nothing`,
+            escaped === null
+                && desktop.text('.BarcodeScanner-statusText') === "Scanning isn't available here — type the code instead."
+                && desktop.notifications() === 0
+                && desktop.find('.BarcodeScanner-scan').getAttribute('aria-disabled') === null,
+            escaped ? String(escaped) : desktop.text('.BarcodeScanner-statusText'),
+        );
+    }
+
+    /*
      * The success path, which no local host can produce for real — hence the
      * stub. What is being asserted is the control's half of the contract: take
      * the string, put it in the input, and tell the platform exactly once.
