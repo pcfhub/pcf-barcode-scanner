@@ -68,8 +68,26 @@
         BarcodeScanner_Desc: "A text field with a device barcode/QR scan button.",
         Value_Name: "Value",
         Value_Desc: "The scanned or typed code.",
-        BarcodeScanner_ScanButton: "Scan",
         BarcodeScanner_Unavailable: "Scanning isn't available here — type the code instead.",
+        ScanMode_Name: "Scan mode",
+        ScanMode_Desc: "One code replaces the value with each scan. Many codes keeps the scanner open and adds each new code on its own line.",
+        ScanMode_One: "One code",
+        ScanMode_Many: "Many codes, one per line",
+        BarcodeScanner_ScanLabel: "Scan a code into {0}",
+        BarcodeScanner_ScanManyLabel: "Scan codes into {0}",
+        BarcodeScanner_AddPlaceholder: "Type a code and press Enter",
+        BarcodeScanner_ListLabel: "Codes in {0}",
+        BarcodeScanner_CountNone: "No codes yet",
+        BarcodeScanner_CountOne: "1 code",
+        BarcodeScanner_CountMany: "{0} codes",
+        BarcodeScanner_Remove: "Remove {0}",
+        BarcodeScanner_Added: "{0} added.",
+        BarcodeScanner_Removed: "{0} removed.",
+        BarcodeScanner_Repeat: "{0} is already in the list.",
+        BarcodeScanner_Full: "{0} doesn't fit — the column is full.",
+        BarcodeScanner_RunNone: "No new codes added.",
+        BarcodeScanner_RunOne: "1 code added.",
+        BarcodeScanner_RunMany: "{0} codes added.",
     };
 
     /**
@@ -170,10 +188,39 @@
          * by default would make the rig agree with the one environment the
          * control is least often in.
          *
-         * Set to a string to have it resolve with that value.
+         * Set to a string to have it resolve with that value — on **every**
+         * call, which is what PCFHub's demo does with a preset's
+         * `state.device.barcode`, and the host a run of scans has to survive:
+         * it answers at once, forever, with nobody pointing a camera at
+         * anything. Set to an array for one code per call, in order — a person
+         * scanning a run of labels — and `barcodeEnd` says what the call after
+         * the last one does. The queue's place is kept by the array (see
+         * `barcodeCursor`), so pass a fresh array for a fresh run.
          */
         barcode: null,
+
+        /**
+         * What `getBarcodeValue()` does once a `barcode` array has run out:
+         * 'reject' (the default) or 'empty' (resolves with ''). Two, because
+         * what a closed scanner returns is unmeasured — no phone has run the
+         * probe — so the control has to end its run on either.
+         */
+        barcodeEnd: 'reject',
+
+        /** The maker's Scan mode: 'one' (the manifest's default) or 'many'. */
+        scanMode: 'one',
+
+        /** The column's `MaxLength` on a form. A canvas app reports 100 whatever the property is bound to. */
+        maxLength: 100,
     };
+
+    /*
+     * How far each `barcode` queue has been read, keyed by the array itself.
+     * A control keeps whichever context it was handed and `createContext` is
+     * called afresh per render, so a cursor held inside a context would start
+     * the run over on every pass.
+     */
+    var barcodeCursor = new WeakMap();
 
     /**
      * Build a `context` for a field control.
@@ -198,16 +245,19 @@
                 value: {
                     raw: o.value,
                     /*
-                     * Present only where the host has column metadata.
+                     * The column on a form; the *property* in a canvas app.
                      *
-                     * The control reads `parameter.attributes?.MaxLength`, and
-                     * that single `?` is the whole canvas/model-driven
-                     * difference. Supplying it on canvas would hide the one bug
-                     * this switch exists to find.
+                     * A canvas app hands over an `attributes` too, for every
+                     * source, describing the manifest property: an empty
+                     * `EntityLogicalName` and `MaxLength: 100` whatever it is
+                     * bound to (measured by pcf-copy-field, 2026-10-06). A
+                     * control that caps a run of codes by `MaxLength` without
+                     * checking for a table caps every canvas list at 100
+                     * characters — which is the bug this shape is here to show.
                      */
                     attributes: host.publishesMetadata
-                        ? { MaxLength: o.maxLength, LogicalName: 'name', DisplayName: o.label }
-                        : undefined,
+                        ? { MaxLength: o.maxLength, LogicalName: 'cll_barcode', EntityLogicalName: 'account', DisplayName: o.label }
+                        : { MaxLength: 100, LogicalName: 'value', EntityLogicalName: '' },
                     /*
                      * `undefined` unless the column carries a field-level
                      * security profile — see SECURITY above. The common case is
@@ -220,6 +270,7 @@
                     type: 'SingleLine.Text',
                 },
 
+                scanMode: { raw: o.scanMode, type: 'Enum' },
             },
 
             mode: {
@@ -269,9 +320,27 @@
              */
             device: {
                 getBarcodeValue: function () {
-                    return o.barcode === null
-                        ? Promise.reject(new Error())
-                        : Promise.resolve(o.barcode);
+                    if (o.calls) {
+                        o.calls.push('getBarcodeValue');
+                    }
+
+                    if (typeof o.barcode === 'string') {
+                        return Promise.resolve(o.barcode);
+                    }
+
+                    if (Array.isArray(o.barcode)) {
+                        var at = barcodeCursor.get(o.barcode) || 0;
+
+                        if (at < o.barcode.length) {
+                            barcodeCursor.set(o.barcode, at + 1);
+
+                            return Promise.resolve(o.barcode[at]);
+                        }
+
+                        return o.barcodeEnd === 'empty' ? Promise.resolve('') : Promise.reject(new Error());
+                    }
+
+                    return Promise.reject(new Error());
                 },
             },
 

@@ -4,8 +4,9 @@
     <external-service-usage enabled="false">
     </external-service-usage>
 
-    <!-- PROBE 0.2.9: P2 asks whether a type group imports over 0.2.2's
-         SingleLine.Text and keeps its binding. SingleLine.Text stays first:
+    <!-- Since 0.3.0 the column may be multiple lines too, for a run of codes
+         one per line. A type group imported over 0.2.2's SingleLine.Text and
+         kept the form's binding (SPEC.md P2). SingleLine.Text stays first:
          the hub demos a group's first member. -->
     <type-group name="text">
       <type>SingleLine.Text</type>
@@ -14,6 +15,13 @@
     </type-group>
 
     <property name="value" display-name-key="Value_Name" description-key="Value_Desc" of-type-group="text" usage="bound" required="true" />
+
+    <!-- Off by default: every installation from before 0.3.0 keeps one code
+         per scan, replacing the value, until a maker chooses otherwise. -->
+    <property name="scanMode" display-name-key="ScanMode_Name" description-key="ScanMode_Desc" of-type="Enum" usage="input" required="false" default-value="one">
+      <value name="one" display-name-key="ScanMode_One">one</value>
+      <value name="many" display-name-key="ScanMode_Many">many</value>
+    </property>
 
     <!-- scanButtonLabel (SingleLine.Text input, default "Scan") removed in
          0.2.0: it existed only so a maker could translate the word "Scan"

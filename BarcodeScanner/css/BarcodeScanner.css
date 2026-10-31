@@ -4,67 +4,462 @@
  * A code component shares a document with the host app and with every other
  * control on the form, so a bare `input { … }` here restyles the page it was
  * dropped onto. The platform does not sandbox this for you.
+ *
+ * The look is Fluent 2's, the way `pcf-copy-field` draws it: the same field
+ * surface, the same subtle icon button inside it, the same tokens and
+ * fallbacks. Two controls with a button in a text field should not look like
+ * two different products on one form.
  */
 
+/*
+ * The palette.
+ *
+ * Each value is `var(--fluentToken, literal)`. When the host emits Fluent 9's
+ * design tokens — a model-driven form does — the token wins and the control
+ * themes itself with the app, brand colour included. The literal is what a
+ * host that publishes nothing gets: Fluent's web light theme, copied out of
+ * `@fluentui/tokens` rather than eyeballed.
+ */
 .BarcodeScanner {
+    --BarcodeScanner-background: var(--colorNeutralBackground3, #f5f5f5);
+    --BarcodeScanner-background-hover: var(--colorNeutralBackground3Hover, #ebebeb);
+    --BarcodeScanner-background-disabled: var(--colorTransparentBackground, transparent);
+    --BarcodeScanner-surface: var(--colorNeutralBackground1, #ffffff);
+    --BarcodeScanner-stroke: var(--colorTransparentStroke, transparent);
+    --BarcodeScanner-stroke-subtle: var(--colorNeutralStroke2, #e0e0e0);
+    --BarcodeScanner-stroke-disabled: var(--colorNeutralStrokeDisabled, #e0e0e0);
+    --BarcodeScanner-stroke-focus: var(--colorCompoundBrandStroke, #0f6cbd);
+    --BarcodeScanner-stroke-focus-pressed: var(--colorCompoundBrandStrokePressed, #0f548c);
+    --BarcodeScanner-stroke-invalid: var(--colorPaletteRedBorder2, #d13438);
+    --BarcodeScanner-foreground: var(--colorNeutralForeground1, #242424);
+    --BarcodeScanner-foreground-secondary: var(--colorNeutralForeground2, #424242);
+    --BarcodeScanner-foreground-tertiary: var(--colorNeutralForeground3, #616161);
+    --BarcodeScanner-foreground-placeholder: var(--colorNeutralForeground4, #707070);
+    --BarcodeScanner-foreground-disabled: var(--colorNeutralForegroundDisabled, #bdbdbd);
+    --BarcodeScanner-foreground-brand: var(--colorCompoundBrandForeground1, #0f6cbd);
+    --BarcodeScanner-foreground-danger: var(--colorPaletteRedForeground1, #bc2f32);
+    --BarcodeScanner-foreground-warning: var(--colorPaletteDarkOrangeForeground1, #c43501);
+    --BarcodeScanner-foreground-success: var(--colorPaletteGreenForeground1, #0e700e);
+    --BarcodeScanner-subtle-hover: var(--colorSubtleBackgroundHover, #f5f5f5);
+    --BarcodeScanner-subtle-pressed: var(--colorSubtleBackgroundPressed, #e0e0e0);
+    --BarcodeScanner-focus-inner: var(--colorStrokeFocus1, #ffffff);
+    --BarcodeScanner-focus-outer: var(--colorStrokeFocus2, #000000);
+    --BarcodeScanner-radius: var(--borderRadiusMedium, 4px);
+    --BarcodeScanner-font-family: var(
+        --fontFamilyBase,
+        "Segoe UI",
+        "Segoe UI Web (West European)",
+        -apple-system,
+        BlinkMacSystemFont,
+        Roboto,
+        "Helvetica Neue",
+        sans-serif
+    );
+    --BarcodeScanner-font-size: var(--fontSizeBase300, 14px);
+    --BarcodeScanner-line-height: var(--lineHeightBase300, 20px);
+    --BarcodeScanner-font-size-caption: var(--fontSizeBase200, 12px);
+    --BarcodeScanner-line-height-caption: var(--lineHeightBase200, 16px);
+    --BarcodeScanner-duration-fast: var(--durationUltraFast, 50ms);
+    --BarcodeScanner-duration-normal: var(--durationNormal, 200ms);
+    --BarcodeScanner-duration-faster: var(--durationFaster, 100ms);
+    --BarcodeScanner-curve-accelerate: var(--curveAccelerateMid, cubic-bezier(1, 0, 1, 1));
+    --BarcodeScanner-curve-decelerate: var(--curveDecelerateMid, cubic-bezier(0, 0, 0, 1));
+    --BarcodeScanner-curve-ease: var(--curveEasyEase, cubic-bezier(0.33, 0, 0.67, 1));
+
     display: block;
     width: 100%;
     box-sizing: border-box;
-    font: inherit;
-    color: inherit;
+    font-family: var(--BarcodeScanner-font-family);
+    color: var(--BarcodeScanner-foreground);
 }
 
-.BarcodeScanner .BarcodeScanner-row {
+/*
+ * The dark fallbacks, applied from `fluentDesignLanguage.isDarkTheme` rather
+ * than from `prefers-color-scheme` — see `applyTheme` in index.ts. Only the
+ * fallbacks change: a host that emits the tokens already hands over its own
+ * dark values through the `var()`.
+ */
+.BarcodeScanner--dark {
+    --BarcodeScanner-background: var(--colorNeutralBackground3, #141414);
+    --BarcodeScanner-background-hover: var(--colorNeutralBackground3Hover, #292929);
+    --BarcodeScanner-surface: var(--colorNeutralBackground1, #292929);
+    --BarcodeScanner-stroke-subtle: var(--colorNeutralStroke2, #525252);
+    --BarcodeScanner-stroke-disabled: var(--colorNeutralStrokeDisabled, #424242);
+    --BarcodeScanner-stroke-focus: var(--colorCompoundBrandStroke, #479ef5);
+    --BarcodeScanner-stroke-focus-pressed: var(--colorCompoundBrandStrokePressed, #2886de);
+    --BarcodeScanner-stroke-invalid: var(--colorPaletteRedBorder2, #e37d80);
+    --BarcodeScanner-foreground: var(--colorNeutralForeground1, #ffffff);
+    --BarcodeScanner-foreground-secondary: var(--colorNeutralForeground2, #d6d6d6);
+    --BarcodeScanner-foreground-tertiary: var(--colorNeutralForeground3, #adadad);
+    --BarcodeScanner-foreground-placeholder: var(--colorNeutralForeground4, #999999);
+    --BarcodeScanner-foreground-disabled: var(--colorNeutralForegroundDisabled, #5c5c5c);
+    --BarcodeScanner-foreground-brand: var(--colorCompoundBrandForeground1, #479ef5);
+    --BarcodeScanner-foreground-danger: var(--colorPaletteRedForeground1, #e37d80);
+    --BarcodeScanner-foreground-warning: var(--colorPaletteDarkOrangeForeground1, #e9835e);
+    --BarcodeScanner-foreground-success: var(--colorPaletteGreenForeground1, #54b054);
+    --BarcodeScanner-subtle-hover: var(--colorSubtleBackgroundHover, #383838);
+    --BarcodeScanner-subtle-pressed: var(--colorSubtleBackgroundPressed, #2e2e2e);
+    --BarcodeScanner-focus-inner: var(--colorStrokeFocus1, #000000);
+    --BarcodeScanner-focus-outer: var(--colorStrokeFocus2, #ffffff);
+}
+
+/*
+ * The field surface: Fluent's `filled-darker` Input, one box holding the input
+ * and the Scan button, 32px tall, with one border and one focus underline —
+ * what the platform's own fields with a trailing button look like.
+ */
+.BarcodeScanner .BarcodeScanner-field {
+    position: relative;
     display: flex;
-    gap: 4px;
+    align-items: center;
+    flex-wrap: nowrap;
+    gap: var(--spacingHorizontalXXS, 2px);
+    box-sizing: border-box;
+    min-height: 32px;
+    border: 1px solid var(--BarcodeScanner-stroke);
+    border-radius: var(--BarcodeScanner-radius);
+    background-color: var(--BarcodeScanner-background);
+    transition: background-color var(--BarcodeScanner-duration-faster) var(--BarcodeScanner-curve-ease);
+}
+
+.BarcodeScanner .BarcodeScanner-field:hover {
+    background-color: var(--BarcodeScanner-background-hover);
+}
+
+/*
+ * The animated focus underline: a scaled pseudo-element rather than a
+ * border that appears, which would add 2px of height and nudge every field
+ * below it as the user tabs through. The timings are copied from Fluent's
+ * Input as `pcf-copy-field` copied them, so the two underlines move alike.
+ */
+.BarcodeScanner .BarcodeScanner-field::after {
+    content: "";
+    position: absolute;
+    right: -1px;
+    bottom: -1px;
+    left: -1px;
+    box-sizing: border-box;
+    height: max(2px, var(--BarcodeScanner-radius));
+    border-bottom: 2px solid var(--BarcodeScanner-stroke-focus);
+    border-bottom-right-radius: var(--BarcodeScanner-radius);
+    border-bottom-left-radius: var(--BarcodeScanner-radius);
+    clip-path: inset(calc(100% - 2px) 0 0 0);
+    transform: scaleX(0);
+    transition-property: transform;
+    transition-duration: var(--BarcodeScanner-duration-fast);
+    transition-delay: var(--BarcodeScanner-curve-accelerate);
+}
+
+/* `:focus-within`, so the Scan button lights the same field the input does. */
+.BarcodeScanner .BarcodeScanner-field:focus-within::after {
+    transform: scaleX(1);
+    transition-duration: var(--BarcodeScanner-duration-normal);
+    transition-delay: var(--BarcodeScanner-curve-decelerate);
+}
+
+.BarcodeScanner .BarcodeScanner-field:focus-within:active::after {
+    border-bottom-color: var(--BarcodeScanner-stroke-focus-pressed);
+}
+
+/* The underline is this box's focus indicator; the UA outline would be a second. */
+.BarcodeScanner .BarcodeScanner-field:focus-within {
+    outline: 2px solid transparent;
 }
 
 .BarcodeScanner .BarcodeScanner-input {
+    /* `min-width: 0`, or a flex item refuses to shrink below its intrinsic
+       width and pushes the button off a narrow form. */
     flex: 1 1 auto;
-    width: 100%;
+    min-width: 0;
+    align-self: stretch;
     box-sizing: border-box;
-    padding: 6px 8px;
-    /* Inherit rather than declare: the host controls the form's type scale, and
-       a hard-coded family is what makes a control look pasted in. */
-    font: inherit;
-    color: inherit;
-    background: transparent;
-    border: 1px solid rgba(0, 0, 0, 0.25);
-    border-radius: 2px;
+    padding: 0 var(--spacingHorizontalM, 12px);
+    border-style: none;
+    outline-style: none;
+    background-color: transparent;
+    color: var(--BarcodeScanner-foreground);
+    font-family: inherit;
+    font-size: var(--BarcodeScanner-font-size);
+    line-height: var(--BarcodeScanner-line-height);
+    font-weight: var(--fontWeightRegular, 400);
+    text-overflow: ellipsis;
 }
 
-.BarcodeScanner .BarcodeScanner-input:focus-visible {
-    outline: 2px solid Highlight;
-    outline-offset: 1px;
+/* `opacity: 1`: Firefox dims placeholders below 4.5:1 against the fill. */
+.BarcodeScanner .BarcodeScanner-input::placeholder {
+    color: var(--BarcodeScanner-foreground-placeholder);
+    opacity: 1;
 }
 
-.BarcodeScanner .BarcodeScanner-input:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
+/*
+ * Scan, drawn as Fluent's subtle icon button: no fill or border until it is
+ * pointed at, so it reads as part of the field. 28px inside a 32px field,
+ * clear of WCAG 2.2 AA's 24px target.
+ */
+.BarcodeScanner .BarcodeScanner-scan,
+.BarcodeScanner .BarcodeScanner-remove {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    padding: 0;
+    border: none;
+    border-radius: var(--BarcodeScanner-radius);
+    background-color: transparent;
+    color: var(--BarcodeScanner-foreground-secondary);
+    cursor: pointer;
+    outline-style: none;
+    transition:
+        background-color var(--BarcodeScanner-duration-faster) var(--BarcodeScanner-curve-ease),
+        color var(--BarcodeScanner-duration-faster) var(--BarcodeScanner-curve-ease);
 }
 
 .BarcodeScanner .BarcodeScanner-scan {
-    flex: 0 0 auto;
-    font: inherit;
-    padding: 6px 12px;
-    border: 1px solid rgba(0, 0, 0, 0.25);
-    border-radius: 2px;
-    background: transparent;
-    cursor: pointer;
+    width: 28px;
+    height: 28px;
+    margin-inline-end: 2px;
 }
 
-.BarcodeScanner .BarcodeScanner-scan:disabled {
-    opacity: 0.6;
+.BarcodeScanner .BarcodeScanner-scan:hover,
+.BarcodeScanner .BarcodeScanner-remove:hover {
+    background-color: var(--BarcodeScanner-subtle-hover);
+    color: var(--BarcodeScanner-foreground-brand);
+}
+
+.BarcodeScanner .BarcodeScanner-scan:active,
+.BarcodeScanner .BarcodeScanner-remove:active {
+    background-color: var(--BarcodeScanner-subtle-pressed);
+}
+
+/* Fluent's focus ring: dark outside, light inside, so it shows on any fill. */
+.BarcodeScanner .BarcodeScanner-scan:focus-visible,
+.BarcodeScanner .BarcodeScanner-remove:focus-visible {
+    outline: 2px solid var(--BarcodeScanner-focus-outer);
+    outline-offset: -2px;
+    box-shadow: inset 0 0 0 4px var(--BarcodeScanner-focus-inner);
+}
+
+/*
+ * A run in flight. `aria-disabled` rather than `disabled` keeps the focus on
+ * the button (see `setBusy`), so the look has to come from here: the brand
+ * colour, as Fluent marks a button that is working, and no pointer.
+ */
+.BarcodeScanner .BarcodeScanner-scan[aria-disabled="true"],
+.BarcodeScanner .BarcodeScanner-scan[aria-disabled="true"]:hover {
+    background-color: var(--BarcodeScanner-subtle-pressed);
+    color: var(--BarcodeScanner-foreground-brand);
+    cursor: progress;
+}
+
+/* `currentColor`, so a glyph follows its button's hover and disabled colours. */
+.BarcodeScanner .BarcodeScanner-icon {
+    display: block;
+    width: 16px;
+    height: 16px;
+    fill: currentColor;
+}
+
+.BarcodeScanner .BarcodeScanner-icon--small {
+    width: 12px;
+    height: 12px;
+}
+
+/*
+ * Disabled — the form's read-only state or a read-only column. Fluent's
+ * disabled Input is a different surface rather than a dimmer one: the fill
+ * goes, the border shows grey, and the underline is gone.
+ */
+.BarcodeScanner--disabled .BarcodeScanner-field,
+.BarcodeScanner--disabled .BarcodeScanner-field:hover {
+    background-color: var(--BarcodeScanner-background-disabled);
+    border-color: var(--BarcodeScanner-stroke-disabled);
+}
+
+.BarcodeScanner--disabled .BarcodeScanner-field::after {
+    display: none;
+}
+
+.BarcodeScanner--disabled .BarcodeScanner-input,
+.BarcodeScanner--disabled .BarcodeScanner-input::placeholder {
+    color: var(--BarcodeScanner-foreground-disabled);
     cursor: not-allowed;
 }
 
-.BarcodeScanner .BarcodeScanner-status {
-    display: block;
-    margin-top: 4px;
-    font-size: 0.85em;
-    color: rgba(0, 0, 0, 0.6);
+.BarcodeScanner .BarcodeScanner-scan:disabled,
+.BarcodeScanner .BarcodeScanner-scan:disabled:hover {
+    background-color: transparent;
+    color: var(--BarcodeScanner-foreground-disabled);
+    cursor: not-allowed;
 }
 
-.BarcodeScanner .BarcodeScanner-status:empty {
+/* Nothing to remove from a list nobody may change. */
+.BarcodeScanner--disabled .BarcodeScanner-remove {
     display: none;
+}
+
+/* `mode.isVisible` false. Canvas relies on it; a form hides the section itself. */
+.BarcodeScanner--hidden {
+    display: none;
+}
+
+/* A failed business rule: the invalid colour on all four borders, dropped
+   while the field has focus, as Fluent does. */
+.BarcodeScanner--invalid .BarcodeScanner-field:not(:focus-within),
+.BarcodeScanner--invalid .BarcodeScanner-field:hover:not(:focus-within) {
+    border-color: var(--BarcodeScanner-stroke-invalid);
+}
+
+/*
+ * The status line and the platform's message, as Fluent's field message: a
+ * caption under the field, an icon before it when it warns or confirms. The
+ * text differs as well as the colour, so the colour is never the only signal.
+ */
+.BarcodeScanner .BarcodeScanner-status,
+.BarcodeScanner .BarcodeScanner-message {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--spacingHorizontalXS, 4px);
+    margin: var(--spacingVerticalXXS, 2px) 0 0;
+    font-family: inherit;
+    font-size: var(--BarcodeScanner-font-size-caption);
+    line-height: var(--BarcodeScanner-line-height-caption);
+    color: var(--BarcodeScanner-foreground-secondary);
+}
+
+.BarcodeScanner .BarcodeScanner-status[data-tone="warning"] {
+    color: var(--BarcodeScanner-foreground-warning);
+}
+
+.BarcodeScanner .BarcodeScanner-status[data-tone="success"] {
+    color: var(--BarcodeScanner-foreground-success);
+}
+
+.BarcodeScanner .BarcodeScanner-statusIcon:empty {
+    display: none;
+}
+
+.BarcodeScanner .BarcodeScanner-statusIcon .BarcodeScanner-icon {
+    width: 12px;
+    height: 12px;
+    margin-top: 2px;
+}
+
+/* Never hidden — emptied. A live region taken out of the tree between
+   announcements is one some screen readers stop watching. */
+.BarcodeScanner .BarcodeScanner-status:has(.BarcodeScanner-statusText:empty) {
+    margin: 0;
+}
+
+.BarcodeScanner .BarcodeScanner-message {
+    color: var(--BarcodeScanner-foreground-danger);
+}
+
+/* An author `display` beats the UA's `[hidden] { display: none }`. */
+.BarcodeScanner .BarcodeScanner-message[hidden],
+.BarcodeScanner .BarcodeScanner-list[hidden] {
+    display: none;
+}
+
+/*
+ * Many codes: the list under the field.
+ *
+ * A count, then the codes in a quiet bordered box, one row each with a
+ * subtle remove button. Capped in height so a long run does not push the rest
+ * of the form a screen down; the rows' buttons are tab stops, so a keyboard
+ * user scrolls it by moving through them.
+ */
+.BarcodeScanner .BarcodeScanner-codes {
+    display: none;
+}
+
+.BarcodeScanner--many .BarcodeScanner-codes {
+    display: block;
+    margin-top: var(--spacingVerticalXS, 4px);
+}
+
+.BarcodeScanner .BarcodeScanner-count {
+    margin: 0 0 var(--spacingVerticalXXS, 2px);
+    font-size: var(--BarcodeScanner-font-size-caption);
+    line-height: var(--BarcodeScanner-line-height-caption);
+    color: var(--BarcodeScanner-foreground-tertiary);
+}
+
+.BarcodeScanner .BarcodeScanner-list {
+    max-height: 240px;
+    margin: 0;
+    padding: var(--spacingVerticalXXS, 2px) 0;
+    overflow-y: auto;
+    list-style: none;
+    box-sizing: border-box;
+    border: 1px solid var(--BarcodeScanner-stroke-subtle);
+    border-radius: var(--BarcodeScanner-radius);
+    background-color: var(--BarcodeScanner-surface);
+}
+
+.BarcodeScanner .BarcodeScanner-code {
+    display: flex;
+    align-items: center;
+    gap: var(--spacingHorizontalS, 8px);
+    min-height: 28px;
+    padding: 0 var(--spacingHorizontalXS, 4px) 0 var(--spacingHorizontalM, 12px);
+}
+
+.BarcodeScanner .BarcodeScanner-code:hover {
+    background-color: var(--BarcodeScanner-subtle-hover);
+}
+
+.BarcodeScanner .BarcodeScanner-codeText {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    font-size: var(--BarcodeScanner-font-size);
+    line-height: var(--BarcodeScanner-line-height);
+    /* Codes are compared digit by digit; equal widths make that easier. */
+    font-variant-numeric: tabular-nums;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.BarcodeScanner .BarcodeScanner-remove {
+    width: 24px;
+    height: 24px;
+    color: var(--BarcodeScanner-foreground-tertiary);
+}
+
+/*
+ * Forced colours collapse every tint to a system keyword, so the borders come
+ * back and the underline takes the system highlight.
+ */
+@media (forced-colors: active) {
+    .BarcodeScanner .BarcodeScanner-field,
+    .BarcodeScanner .BarcodeScanner-list {
+        border-color: ButtonBorder;
+    }
+
+    .BarcodeScanner .BarcodeScanner-field::after {
+        border-bottom-color: Highlight;
+    }
+
+    .BarcodeScanner--disabled .BarcodeScanner-field {
+        border-color: GrayText;
+    }
+
+    .BarcodeScanner .BarcodeScanner-scan:disabled,
+    .BarcodeScanner--disabled .BarcodeScanner-input {
+        color: GrayText;
+    }
+}
+
+/* The animation is decoration; the focus it shows is not. Shortened to nothing,
+   not removed, so the line still appears. */
+@media screen and (prefers-reduced-motion: reduce) {
+    .BarcodeScanner .BarcodeScanner-field,
+    .BarcodeScanner .BarcodeScanner-field::after,
+    .BarcodeScanner .BarcodeScanner-field:focus-within::after,
+    .BarcodeScanner .BarcodeScanner-scan,
+    .BarcodeScanner .BarcodeScanner-remove {
+        transition-duration: 0.01ms;
+        transition-delay: 0.01ms;
+    }
 }

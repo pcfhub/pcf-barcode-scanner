@@ -84,10 +84,64 @@
 
   <!-- Runtime UI strings — read via context.resources.getString() in
        index.ts, not the maker's properties pane. -->
-  <data name="BarcodeScanner_ScanButton" xml:space="preserve">
-    <value>Scan</value>
-  </data>
   <data name="BarcodeScanner_Unavailable" xml:space="preserve">
     <value>Scanning isn't available here — type the code instead.</value>
+  </data>
+  <data name="ScanMode_Name" xml:space="preserve">
+    <value>Scan mode</value>
+  </data>
+  <data name="ScanMode_Desc" xml:space="preserve">
+    <value>One code replaces the value with each scan. Many codes keeps the scanner open and adds each new code on its own line.</value>
+  </data>
+  <data name="ScanMode_One" xml:space="preserve">
+    <value>One code</value>
+  </data>
+  <data name="ScanMode_Many" xml:space="preserve">
+    <value>Many codes, one per line</value>
+  </data>
+  <data name="BarcodeScanner_ScanLabel" xml:space="preserve">
+    <value>Scan a code into {0}</value>
+  </data>
+  <data name="BarcodeScanner_ScanManyLabel" xml:space="preserve">
+    <value>Scan codes into {0}</value>
+  </data>
+  <data name="BarcodeScanner_AddPlaceholder" xml:space="preserve">
+    <value>Type a code and press Enter</value>
+  </data>
+  <data name="BarcodeScanner_ListLabel" xml:space="preserve">
+    <value>Codes in {0}</value>
+  </data>
+  <data name="BarcodeScanner_CountNone" xml:space="preserve">
+    <value>No codes yet</value>
+  </data>
+  <data name="BarcodeScanner_CountOne" xml:space="preserve">
+    <value>1 code</value>
+  </data>
+  <data name="BarcodeScanner_CountMany" xml:space="preserve">
+    <value>{0} codes</value>
+  </data>
+  <data name="BarcodeScanner_Remove" xml:space="preserve">
+    <value>Remove {0}</value>
+  </data>
+  <data name="BarcodeScanner_Added" xml:space="preserve">
+    <value>{0} added.</value>
+  </data>
+  <data name="BarcodeScanner_Removed" xml:space="preserve">
+    <value>{0} removed.</value>
+  </data>
+  <data name="BarcodeScanner_Repeat" xml:space="preserve">
+    <value>{0} is already in the list.</value>
+  </data>
+  <data name="BarcodeScanner_Full" xml:space="preserve">
+    <value>{0} doesn't fit — the column is full.</value>
+  </data>
+  <data name="BarcodeScanner_RunNone" xml:space="preserve">
+    <value>No new codes added.</value>
+  </data>
+  <data name="BarcodeScanner_RunOne" xml:space="preserve">
+    <value>1 code added.</value>
+  </data>
+  <data name="BarcodeScanner_RunMany" xml:space="preserve">
+    <value>{0} codes added.</value>
   </data>
 </root>

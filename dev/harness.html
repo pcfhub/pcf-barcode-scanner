@@ -1,0 +1,256 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>Barcode Scanner — harness</title>
+        <!--
+            The control's own page, for looking at it: every state a form or a
+            canvas app can put it in, as switches, beside the control.
+
+            Smaller than the template's field harness on purpose. This
+            repository's `dev/host.js` predates the template's and stands in
+            for one device call; the switches here are the ones that change
+            what this control draws — the host, its theme, the form's
+            read-only state, a failed rule, the scan mode, and what the
+            scanner answers. `npm run smoke` asserts the same states; this
+            shows them.
+
+            Served by `npm run harness` (dev/serve.js), which serves the
+            repository root, so the bundle and the stylesheet load from out/.
+        -->
+        <link rel="stylesheet" href="../out/controls/BarcodeScanner/css/BarcodeScanner.css" />
+        <style>
+            body {
+                margin: 0;
+                font: 14px/20px "Segoe UI", system-ui, sans-serif;
+                background: #faf9f8;
+                color: #242424;
+            }
+
+            body.is-dark {
+                background: #1f1f1f;
+                color: #ffffff;
+            }
+
+            main {
+                display: grid;
+                grid-template-columns: minmax(0, 1fr) 300px;
+                gap: 24px;
+                padding: 24px;
+            }
+
+            @media (max-width: 720px) {
+                main {
+                    grid-template-columns: 1fr;
+                }
+            }
+
+            .stage {
+                padding: 16px;
+                border-radius: 8px;
+                background: #ffffff;
+                box-shadow: 0 1px 2px rgba(0, 0, 0, 0.14);
+            }
+
+            body.is-dark .stage {
+                background: #292929;
+            }
+
+            .stage label.form-label {
+                display: block;
+                margin-bottom: 4px;
+                font-weight: 600;
+            }
+
+            #control {
+                max-width: var(--harness-width, 100%);
+            }
+
+            form.switches {
+                display: grid;
+                gap: 12px;
+                align-content: start;
+            }
+
+            form.switches label {
+                display: grid;
+                gap: 2px;
+            }
+
+            form.switches label.check {
+                display: flex;
+                gap: 8px;
+                align-items: center;
+            }
+
+            form.switches span {
+                font-size: 12px;
+                opacity: 0.75;
+            }
+
+            pre#log {
+                max-height: 160px;
+                overflow: auto;
+                font-size: 12px;
+                white-space: pre-wrap;
+            }
+        </style>
+    </head>
+    <body>
+        <main>
+            <section class="stage">
+                <label class="form-label" id="form-label">Product code</label>
+                <div id="control"></div>
+                <pre id="log" aria-label="What the control wrote"></pre>
+            </section>
+
+            <form class="switches" id="switches">
+                <label>
+                    Host
+                    <select id="harness-host">
+                        <option value="model-driven">Model-driven form</option>
+                        <option value="canvas">Canvas app</option>
+                    </select>
+                    <span>A canvas app publishes no theme and no column.</span>
+                </label>
+
+                <label>
+                    Scan mode
+                    <select id="harness-mode">
+                        <option value="one">One code</option>
+                        <option value="many">Many codes, one per line</option>
+                    </select>
+                </label>
+
+                <label>
+                    Column value
+                    <textarea id="harness-value" rows="3">5901234123457</textarea>
+                    <span>What the form hands over. Changing it is a script's write.</span>
+                </label>
+
+                <label>
+                    Column MaxLength
+                    <input type="number" id="harness-maxlength" value="100" />
+                </label>
+
+                <label>
+                    Scanner answers
+                    <textarea id="harness-barcode" rows="3" placeholder="No scanner on this host">4006381333931
+9780201633610
+4006381333931</textarea>
+                    <span>One code per call, a line each; empty refuses every call. Edit it to start a new run.</span>
+                </label>
+
+                <label>
+                    When the codes run out
+                    <select id="harness-barcodeend">
+                        <option value="reject">The call rejects</option>
+                        <option value="empty">The call resolves with ''</option>
+                    </select>
+                    <span>What a closed scanner returns is unmeasured on a device.</span>
+                </label>
+
+                <label class="check"><input type="checkbox" id="harness-dark" /> Dark theme</label>
+                <label class="check"><input type="checkbox" id="harness-disabled" /> Read-only form</label>
+                <label class="check"><input type="checkbox" id="harness-error" /> A business rule failed</label>
+                <label class="check"><input type="checkbox" id="harness-rtl" /> Right to left</label>
+
+                <label>
+                    Width
+                    <input type="number" id="harness-width" value="360" />
+                    <span>The field's column on the form, in pixels.</span>
+                </label>
+            </form>
+        </main>
+
+        <script src="host.js"></script>
+        <script>
+            // Before the bundle: it calls registerControl as it loads.
+            window.__registration = window.__pcfHost.captureRegistration(window);
+        </script>
+        <script src="../out/controls/BarcodeScanner/bundle.js"></script>
+        <script>
+            (function () {
+                'use strict';
+
+                var host = window.__pcfHost;
+                var registration = window.__registration;
+                var container = document.getElementById('control');
+                var log = document.getElementById('log');
+                var instance = null;
+                var written = null;
+                var scannerText = null;
+                var scannerQueue = null;
+
+                function byId(id) {
+                    return document.getElementById(id);
+                }
+
+                // One array per text, so the rig keeps its place in the queue
+                // across renders; editing the box starts a new run.
+                function scannerAnswers() {
+                    var text = byId('harness-barcode').value;
+
+                    if (text !== scannerText) {
+                        scannerText = text;
+                        scannerQueue = text.split(/\r?\n/).map(function (line) { return line.trim(); }).filter(Boolean);
+                    }
+
+                    return scannerQueue.length ? scannerQueue : null;
+                }
+
+                function options() {
+                    return {
+                        host: byId('harness-host').value,
+                        scanMode: byId('harness-mode').value,
+                        value: written !== null ? written : byId('harness-value').value,
+                        maxLength: Number(byId('harness-maxlength').value) || 100,
+                        barcode: scannerAnswers(),
+                        barcodeEnd: byId('harness-barcodeend').value,
+                        dark: byId('harness-dark').checked,
+                        disabled: byId('harness-disabled').checked,
+                        error: byId('harness-error').checked,
+                        rtl: byId('harness-rtl').checked,
+                    };
+                }
+
+                function render() {
+                    var o = options();
+
+                    document.body.classList.toggle('is-dark', o.dark);
+                    container.style.setProperty('--harness-width', (Number(byId('harness-width').value) || 360) + 'px');
+
+                    if (!instance) {
+                        instance = new registration.ctor();
+                        instance.init(host.createContext(o), function () {
+                            // The platform's half of a write: read the output,
+                            // then hand it straight back, as a form does.
+                            written = instance.getOutputs().value;
+                            log.textContent = 'wrote ' + JSON.stringify(written) + '\n' + log.textContent;
+                            setTimeout(render, 150);
+                        }, {}, container);
+                    }
+
+                    instance.updateView(host.createContext(o));
+                }
+
+                byId('switches').addEventListener('change', function (event) {
+                    // A value typed into the switch is the form's own write.
+                    if (event.target.id === 'harness-value') {
+                        written = null;
+                    }
+
+                    render();
+                });
+
+                if (!registration.ctor) {
+                    container.textContent = 'No bundle at out/controls/BarcodeScanner — run npm run build.';
+                    return;
+                }
+
+                render();
+            })();
+        </script>
+    </body>
+</html>

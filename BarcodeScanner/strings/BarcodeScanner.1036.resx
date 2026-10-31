@@ -77,10 +77,64 @@
     <value>Le code scanné ou saisi.</value>
   </data>
 
-  <data name="BarcodeScanner_ScanButton" xml:space="preserve">
-    <value>Scanner</value>
-  </data>
   <data name="BarcodeScanner_Unavailable" xml:space="preserve">
     <value>La numérisation n'est pas disponible ici — saisissez le code à la place.</value>
+  </data>
+  <data name="ScanMode_Name" xml:space="preserve">
+    <value>Mode de numérisation</value>
+  </data>
+  <data name="ScanMode_Desc" xml:space="preserve">
+    <value>Un code remplace la valeur à chaque numérisation. Plusieurs codes garde le scanner ouvert et ajoute chaque nouveau code sur sa propre ligne.</value>
+  </data>
+  <data name="ScanMode_One" xml:space="preserve">
+    <value>Un code</value>
+  </data>
+  <data name="ScanMode_Many" xml:space="preserve">
+    <value>Plusieurs codes, un par ligne</value>
+  </data>
+  <data name="BarcodeScanner_ScanLabel" xml:space="preserve">
+    <value>Scanner un code dans {0}</value>
+  </data>
+  <data name="BarcodeScanner_ScanManyLabel" xml:space="preserve">
+    <value>Scanner des codes dans {0}</value>
+  </data>
+  <data name="BarcodeScanner_AddPlaceholder" xml:space="preserve">
+    <value>Saisissez un code et appuyez sur Entrée</value>
+  </data>
+  <data name="BarcodeScanner_ListLabel" xml:space="preserve">
+    <value>Codes de {0}</value>
+  </data>
+  <data name="BarcodeScanner_CountNone" xml:space="preserve">
+    <value>Aucun code pour l'instant</value>
+  </data>
+  <data name="BarcodeScanner_CountOne" xml:space="preserve">
+    <value>1 code</value>
+  </data>
+  <data name="BarcodeScanner_CountMany" xml:space="preserve">
+    <value>{0} codes</value>
+  </data>
+  <data name="BarcodeScanner_Remove" xml:space="preserve">
+    <value>Supprimer {0}</value>
+  </data>
+  <data name="BarcodeScanner_Added" xml:space="preserve">
+    <value>{0} ajouté.</value>
+  </data>
+  <data name="BarcodeScanner_Removed" xml:space="preserve">
+    <value>{0} supprimé.</value>
+  </data>
+  <data name="BarcodeScanner_Repeat" xml:space="preserve">
+    <value>{0} est déjà dans la liste.</value>
+  </data>
+  <data name="BarcodeScanner_Full" xml:space="preserve">
+    <value>{0} ne tient pas : la colonne est pleine.</value>
+  </data>
+  <data name="BarcodeScanner_RunNone" xml:space="preserve">
+    <value>Aucun nouveau code ajouté.</value>
+  </data>
+  <data name="BarcodeScanner_RunOne" xml:space="preserve">
+    <value>1 code ajouté.</value>
+  </data>
+  <data name="BarcodeScanner_RunMany" xml:space="preserve">
+    <value>{0} codes ajoutés.</value>
   </data>
 </root>

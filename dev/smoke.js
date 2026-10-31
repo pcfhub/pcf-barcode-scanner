@@ -104,7 +104,10 @@ function disposeAll() {
  */
 function mount(options) {
     const container = dom.createElement('div');
-    const context = host.createContext({ ...options, getString: marked });
+    // `realStrings` reads the English .resx through the rig, for assertions
+    // about a sentence the control composed; the default marks every key.
+    const getString = options.realStrings ? undefined : marked;
+    const context = host.createContext({ ...options, getString });
     const instance = new registration.ctor();
 
     let notifications = 0;
@@ -125,7 +128,9 @@ function mount(options) {
         container,
         outputs: () => instance.getOutputs(),
         notifications: () => notifications,
-        update: (next) => instance.updateView(host.createContext({ ...options, ...next, getString: marked })),
+        update: (next) => instance.updateView(host.createContext({ ...options, ...next, getString })),
+        has: (name) => container.classList.contains(name),
+        all: (selector) => container.querySelectorAll(selector),
         destroy: () => {
             instance.destroy();
 
@@ -151,6 +156,19 @@ function mount(options) {
 /** Let a rejected promise settle before asserting on what the catch wrote. */
 const settle = () => new Promise((resolve) => process.nextTick(resolve));
 
+/**
+ * Let a run of scans finish. Each step awaits the scanner and then pauses on
+ * a zero-delay timer — which the fake clock holds until it is advanced — so a
+ * run needs both turned, step after step. `setImmediate` is Node's own and
+ * the clock leaves it alone, which is why it drains the promise queue here.
+ */
+async function drain(steps = 30) {
+    for (let i = 0; i < steps; i += 1) {
+        await new Promise((resolve) => setImmediate(resolve));
+        time.advance(1);
+    }
+}
+
 check('bundle registered a control', typeof registration.ctor === 'function');
 
 if (typeof registration.ctor !== 'function') {
@@ -173,17 +191,47 @@ check(
 );
 
 /*
- * The button label comes from the .resx rather than from a property.
- *
- * It used to be an input property, so a maker translated the word "Scan" by
- * hand per instance — 0.2.0 removed it once the manifest carried real
- * translations. This asserts the removal stuck: a literal in the source would
- * read the same on screen and be invisible in a review.
+ * The button is a glyph since 0.3.0, so its name is all a screen reader gets
+ * and its tooltip is all a sighted user who does not know the icon gets. Both
+ * come from the .resx — a literal in the source would read the same on screen
+ * and be invisible in a review — and both name the field, so two scanners on
+ * one form are not two buttons called "Scan".
  */
 check(
-    'the scan button labels itself from the .resx, not from a property',
-    plain.text('.BarcodeScanner-scan') === 'resx:BarcodeScanner_ScanButton',
-    plain.text('.BarcodeScanner-scan'),
+    'the scan button is named from the .resx, as its label and its tooltip',
+    plain.find('.BarcodeScanner-scan').getAttribute('aria-label') === 'resx:BarcodeScanner_ScanLabel'
+        && plain.find('.BarcodeScanner-scan').title === 'resx:BarcodeScanner_ScanLabel',
+    `${plain.find('.BarcodeScanner-scan').getAttribute('aria-label')} / ${plain.find('.BarcodeScanner-scan').title}`,
+);
+
+const glyph = plain.find('.BarcodeScanner-scan').querySelector('svg');
+
+check(
+    'and draws a Fluent glyph that a screen reader is told to skip',
+    glyph !== null && glyph.getAttribute('aria-hidden') === 'true' && plain.text('.BarcodeScanner-scan') === '',
+    String(glyph && glyph.getAttribute('aria-hidden')),
+);
+
+check(
+    'the input and the button share one field surface, as the platform\'s own fields do',
+    plain.find('.BarcodeScanner-field').querySelector('.BarcodeScanner-input') !== null
+        && plain.find('.BarcodeScanner-field').querySelector('.BarcodeScanner-scan') !== null,
+);
+
+check(
+    'the named field reads as its form label, not the control\'s name',
+    mount({ realStrings: true }).find('.BarcodeScanner-scan').getAttribute('aria-label') === 'Scan a code into Product code',
+    mount({ realStrings: true }).find('.BarcodeScanner-scan').getAttribute('aria-label'),
+);
+
+/*
+ * The host's theme, and only the host's: a model-driven form says dark or
+ * light; a canvas app says nothing, and nothing is not "light".
+ */
+check(
+    'a dark host gets the dark fallbacks; a host that says nothing gets no class',
+    mount({ dark: true }).has('BarcodeScanner--dark') && !mount({ dark: false }).has('BarcodeScanner--dark')
+        && !mount({ host: 'canvas', dark: true }).has('BarcodeScanner--dark'),
 );
 
 /*
@@ -392,6 +440,232 @@ check(
     echoing.update({ value: 'SET-BY-SCRIPT' });
 
     check('but a value the control never wrote is taken from the form', box.value === 'SET-BY-SCRIPT', box.value);
+
+    /* ------------------------------------------------------- many codes */
+
+    /*
+     * Scan mode "many" (0.3.0). The column holds one code a line; the box adds
+     * a code; Scan calls the scanner until it is closed. **None of this has
+     * met a real scanner** — no phone has run the probe — so what a closed
+     * scanner returns is played both ways here, and the loop's guards are
+     * asserted against the one host known to answer without a person: one
+     * that hands back the same code on every call, as the hub's demo does.
+     */
+    const listed = mount({ scanMode: 'many', value: 'A\nB', realStrings: true });
+
+    check(
+        'many: the column\'s lines are listed, counted, and the box is left empty to add to',
+        listed.all('.BarcodeScanner-code').length === 2
+            && listed.text('.BarcodeScanner-count') === '2 codes'
+            && listed.find('.BarcodeScanner-input').value === ''
+            && listed.find('.BarcodeScanner-input').placeholder === 'Type a code and press Enter'
+            && listed.has('BarcodeScanner--many'),
+        `${listed.all('.BarcodeScanner-code').length} rows, "${listed.text('.BarcodeScanner-count')}"`,
+    );
+
+    check(
+        'and each row\'s remove button names the code it removes',
+        listed.all('.BarcodeScanner-remove')[1].getAttribute('aria-label') === 'Remove B',
+        listed.all('.BarcodeScanner-remove')[1].getAttribute('aria-label'),
+    );
+
+    check(
+        'and Scan says it scans codes, plural',
+        listed.find('.BarcodeScanner-scan').getAttribute('aria-label') === 'Scan codes into Product code',
+        listed.find('.BarcodeScanner-scan').getAttribute('aria-label'),
+    );
+
+    const runCalls = [];
+    const run = mount({ scanMode: 'many', value: '', barcode: ['111', '222', '333'], calls: runCalls, realStrings: true });
+
+    run.find('.BarcodeScanner-scan').click();
+
+    const busyDuring = run.find('.BarcodeScanner-scan').getAttribute('aria-disabled');
+    const disabledDuring = run.find('.BarcodeScanner-scan').disabled;
+
+    run.find('.BarcodeScanner-scan').click();
+    await drain();
+
+    check(
+        'many: a run adds each code as its own line, until the scanner is closed',
+        run.outputs().value === '111\n222\n333' && run.all('.BarcodeScanner-code').length === 3,
+        JSON.stringify(run.outputs().value),
+    );
+
+    check(
+        'and writes each one as it arrives, so a run cut short keeps what it had',
+        run.notifications() === 3,
+        String(run.notifications()),
+    );
+
+    check(
+        'and says how many it added when it is over',
+        run.text('.BarcodeScanner-statusText') === '3 codes added.' && run.find('.BarcodeScanner-status').dataset.tone === 'success',
+        `${run.text('.BarcodeScanner-statusText')} (${run.find('.BarcodeScanner-status').dataset.tone})`,
+    );
+
+    check(
+        'while it runs, Scan is aria-disabled — not disabled, which would drop the focus — and a second press starts nothing',
+        busyDuring === 'true' && disabledDuring === false && runCalls.length === 4
+            && run.find('.BarcodeScanner-scan').getAttribute('aria-disabled') === null,
+        `during: aria-disabled ${busyDuring}, disabled ${disabledDuring}; calls ${runCalls.length}; after: ${run.find('.BarcodeScanner-scan').getAttribute('aria-disabled')}`,
+    );
+
+    const closedEmpty = mount({ scanMode: 'many', value: '', barcode: ['111', '222'], barcodeEnd: 'empty', realStrings: true });
+
+    closedEmpty.find('.BarcodeScanner-scan').click();
+    await drain();
+
+    check(
+        'a scanner closed with an empty answer ends the run the same way as one that refuses',
+        closedEmpty.outputs().value === '111\n222' && closedEmpty.text('.BarcodeScanner-statusText') === '2 codes added.',
+        `${JSON.stringify(closedEmpty.outputs().value)} — ${closedEmpty.text('.BarcodeScanner-statusText')}`,
+    );
+
+    const skipped = mount({ scanMode: 'many', value: '', barcode: ['111', '111', '222'], realStrings: true });
+
+    skipped.find('.BarcodeScanner-scan').click();
+    await drain();
+
+    check(
+        'a repeat is skipped and the run goes on',
+        skipped.outputs().value === '111\n222' && skipped.notifications() === 2,
+        `${JSON.stringify(skipped.outputs().value)}, notifications ${skipped.notifications()}`,
+    );
+
+    const sameCalls = [];
+    const same = mount({ scanMode: 'many', value: '', barcode: 'SAME', calls: sameCalls, realStrings: true });
+
+    same.find('.BarcodeScanner-scan').click();
+    await drain();
+
+    check(
+        'a host that answers the same code forever ends the run after two repeats — the hub\'s demo is one',
+        same.outputs().value === 'SAME' && sameCalls.length === 3,
+        `${JSON.stringify(same.outputs().value)}, calls ${sameCalls.length}`,
+    );
+
+    check(
+        'and the status line says why, as a warning',
+        same.text('.BarcodeScanner-statusText') === '1 code added. SAME is already in the list.'
+            && same.find('.BarcodeScanner-status').dataset.tone === 'warning'
+            && same.find('.BarcodeScanner-statusIcon').querySelector('svg') !== null,
+        `${same.text('.BarcodeScanner-statusText')} (${same.find('.BarcodeScanner-status').dataset.tone})`,
+    );
+
+    const none = mount({ scanMode: 'many', value: 'A', barcode: null, realStrings: true });
+
+    none.find('.BarcodeScanner-scan').click();
+    await drain();
+
+    check(
+        'many: a first call refused is "no scanner here", and nothing is written',
+        none.text('.BarcodeScanner-statusText') === "Scanning isn't available here — type the code instead." && none.notifications() === 0,
+        none.text('.BarcodeScanner-statusText'),
+    );
+
+    /*
+     * The column's limit, measured (SPEC.md P4): one character past it and the
+     * save is refused outright. So a code that would not fit is not added.
+     */
+    const full = mount({ scanMode: 'many', value: '12345', maxLength: 10, barcode: ['67890', '1'], realStrings: true });
+
+    full.find('.BarcodeScanner-scan').click();
+    await drain();
+
+    check(
+        'a code that would take the column past its MaxLength is not added, and the run stops there',
+        full.outputs().value === '12345' && full.notifications() === 0
+            && full.text('.BarcodeScanner-statusText') === "No new codes added. 67890 doesn't fit — the column is full.",
+        `${JSON.stringify(full.outputs().value)} — ${full.text('.BarcodeScanner-statusText')}`,
+    );
+
+    const canvasLong = mount({ host: 'canvas', scanMode: 'many', value: 'X'.repeat(95), barcode: ['ABCDEFGHIJ'], realStrings: true });
+
+    canvasLong.find('.BarcodeScanner-scan').click();
+    await drain();
+
+    check(
+        'but a canvas app\'s MaxLength of 100 describes the property, not a column, and caps nothing',
+        canvasLong.outputs().value === `${'X'.repeat(95)}\nABCDEFGHIJ`,
+        `${canvasLong.outputs().value.length} characters`,
+    );
+
+    const typedMany = mount({ scanMode: 'many', value: 'A', realStrings: true });
+    const addBox = typedMany.find('.BarcodeScanner-input');
+
+    addBox.value = ' B ';
+    addBox.dispatchEvent({ type: 'input', target: addBox });
+    addBox.dispatchEvent({ type: 'keydown', key: 'Enter', target: addBox, preventDefault() {} });
+
+    check(
+        'many: Enter adds a typed code, trimmed, and empties the box — the control never needs a scanner',
+        typedMany.outputs().value === 'A\nB' && addBox.value === '' && typedMany.notifications() === 1,
+        `${JSON.stringify(typedMany.outputs().value)}, box "${addBox.value}", notifications ${typedMany.notifications()}`,
+    );
+
+    check('and typing alone writes nothing', mount({ scanMode: 'many', value: 'A' }).notifications() === 0);
+
+    const removing = mount({ scanMode: 'many', value: 'A\nB\nC', realStrings: true });
+
+    removing.all('.BarcodeScanner-remove')[1].click();
+
+    check(
+        'many: removing a row writes the rest, and the focus lands on the row that took its place',
+        removing.outputs().value === 'A\nC'
+            && dom.document.activeElement === removing.all('.BarcodeScanner-remove')[1]
+            && removing.text('.BarcodeScanner-statusText') === 'B removed.',
+        `${JSON.stringify(removing.outputs().value)}; focus on ${dom.document.activeElement && dom.document.activeElement.getAttribute('aria-label')}`,
+    );
+
+    removing.all('.BarcodeScanner-remove')[1].click();
+    removing.all('.BarcodeScanner-remove')[0].click();
+
+    check(
+        'and removing the last row hands the focus to the box',
+        removing.outputs().value === '' && dom.document.activeElement === removing.find('.BarcodeScanner-input')
+            && removing.text('.BarcodeScanner-count') === 'No codes yet',
+        `${JSON.stringify(removing.outputs().value)}, "${removing.text('.BarcodeScanner-count')}"`,
+    );
+
+    // An echo of an earlier write of the run must not shrink the list back.
+    run.update({ value: '111\n222' });
+
+    check(
+        'many: a late echo of an earlier write does not take codes back off the list',
+        run.all('.BarcodeScanner-code').length === 3 && run.outputs().value === '111\n222\n333',
+        `${run.all('.BarcodeScanner-code').length} rows`,
+    );
+
+    run.update({ value: 'X\nY' });
+
+    check('but a value the form sets is listed as it is', run.all('.BarcodeScanner-code').length === 2, `${run.all('.BarcodeScanner-code').length} rows`);
+
+    const readOnlyMany = mount({ scanMode: 'many', value: 'A', disabled: true });
+
+    readOnlyMany.all('.BarcodeScanner-remove')[0].click();
+
+    check(
+        'a read-only form disables Scan and the box in many mode, and a row cannot be removed',
+        readOnlyMany.has('BarcodeScanner--disabled') && readOnlyMany.find('.BarcodeScanner-scan').disabled
+            && readOnlyMany.find('.BarcodeScanner-input').disabled && readOnlyMany.notifications() === 0,
+    );
+
+    const switching = mount({ scanMode: 'one', value: 'A\nB' });
+
+    switching.update({ scanMode: 'many' });
+
+    const inMany = switching.find('.BarcodeScanner-input').value;
+
+    switching.update({ scanMode: 'one' });
+
+    // A one-line box drops line breaks from what it is given, as a browser's
+    // does — so one-code mode shows a list as one run of text (documented).
+    check(
+        'switching the mode moves the value between the box and the list without writing',
+        inMany === '' && switching.find('.BarcodeScanner-input').value === 'AB' && switching.notifications() === 0,
+        `many box "${inMany}", one box ${JSON.stringify(switching.find('.BarcodeScanner-input').value)}`,
+    );
 
     /* ------------------------------------------------- what destroy owes */
 
