@@ -1,10 +1,19 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <manifest>
-  <control namespace="PCFHub" constructor="BarcodeScanner" version="0.2.2" display-name-key="BarcodeScanner_Name" description-key="BarcodeScanner_Desc" control-type="standard" >
+  <control namespace="PCFHub" constructor="BarcodeScanner" version="0.2.9" display-name-key="BarcodeScanner_Name" description-key="BarcodeScanner_Desc" control-type="standard" >
     <external-service-usage enabled="false">
     </external-service-usage>
 
-    <property name="value" display-name-key="Value_Name" description-key="Value_Desc" of-type="SingleLine.Text" usage="bound" required="true" />
+    <!-- PROBE 0.2.9: P2 asks whether a type group imports over 0.2.2's
+         SingleLine.Text and keeps its binding. SingleLine.Text stays first:
+         the hub demos a group's first member. -->
+    <type-group name="text">
+      <type>SingleLine.Text</type>
+      <type>SingleLine.TextArea</type>
+      <type>Multiple</type>
+    </type-group>
+
+    <property name="value" display-name-key="Value_Name" description-key="Value_Desc" of-type-group="text" usage="bound" required="true" />
 
     <!-- scanButtonLabel (SingleLine.Text input, default "Scan") removed in
          0.2.0: it existed only so a maker could translate the word "Scan"

@@ -1,4 +1,5 @@
 import { IInputs, IOutputs } from './generated/ManifestTypes';
+import * as probe from './probe';
 
 /**
  * A standard (non-virtual) field control — no React needed for one text
@@ -72,9 +73,17 @@ export class BarcodeScanner implements ComponentFramework.StandardControl<IInput
         this.container.appendChild(this.status);
 
         this.render(context);
+
+        probe.attach(context, this.container, (value) => {
+            this.value = value;
+            this.input.value = value;
+            this.remember(value);
+            this.notifyOutputChanged();
+        });
     }
 
     public updateView(context: ComponentFramework.Context<IInputs>): void {
+        probe.pass(context);
         this.render(context);
     }
 
